@@ -1,3 +1,27 @@
+## What's New in v0.4.7
+
+### PyTorch Install Heartbeat
+- Long PyTorch downloads (multi-GB CUDA wheels) now show periodic progress messages every 30 seconds so you know the installer hasn't stalled
+- Applies to both first-time setup and PyTorch reinstall from Settings
+
+### PyTorch Install Reliability
+- Added `--extra-index-url https://pypi.org/simple/` fallback to all PyTorch install commands (NVIDIA, Intel XPU, CPU)
+- Fixes installs that failed when non-PyTorch dependencies weren't available on the GPU-specific index
+
+### Info Tips Toggle
+- New "Show Info Tips" setting in Settings → Accessibility to hide/show the (?) tooltip icons throughout the interface
+- Useful for experienced users who no longer need the contextual help hints
+
+### Dimension Calculation Fix
+- Improved the area-faithful aspect ratio formula to pick the dimension pair closest to the target area
+- Fixes edge cases where certain aspect ratios produced dimensions slightly off from the expected pixel count
+
+### Anima Minimum Resolution
+- Anima models now auto-clamp to at least 1024² total pixel area before generating
+- Preserves your chosen aspect ratio while ensuring the model operates at a resolution where it produces good results
+
+---
+
 ## What's New in v0.4.6
 
 ### Wayland AppImage Fix (Issue #3)

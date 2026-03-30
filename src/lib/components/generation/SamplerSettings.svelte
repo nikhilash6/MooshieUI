@@ -116,7 +116,7 @@
   <!-- Sampler + Scheduler -->
   <div class="grid grid-cols-2 gap-2">
     <div>
-      <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.sampler.label')}<InfoTip text="The algorithm used to progressively remove noise from the image. Different samplers produce different results — 'euler' is fast and reliable, 'dpmpp' variants offer higher quality, 'ancestral' ones add randomness for variety." /></label>
+      <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.sampler.label')}<InfoTip text="The algorithm used to progressively remove noise from the image. Different samplers produce different results - 'euler' is fast and reliable, 'dpmpp' variants offer higher quality, 'ancestral' ones add randomness for variety." /></label>
       <select
         bind:value={generation.samplerName}
         onchange={onSamplerChange}
@@ -158,7 +158,7 @@
     </div>
     <div>
       <label class="flex items-center justify-between text-xs text-neutral-400 mb-1">
-        <span>{locale.t('generation.sampler.cfg')}<InfoTip text="Classifier-Free Guidance — how closely the AI follows your prompt. Higher = more literal but can look artificial. Lower = more creative but may ignore parts of your prompt. CFG++ samplers work best around 1-2." /></span>
+        <span>{locale.t('generation.sampler.cfg')}<InfoTip text="Classifier-Free Guidance - how closely the AI follows your prompt. Higher = more literal but can look artificial. Lower = more creative but may ignore parts of your prompt. CFG++ samplers work best around 1-2." /></span>
         <EditableValue value={generation.cfg} min={0} max={30} step={0.1} decimals={1} onchange={(v) => generation.cfg = v} />
       </label>
       <input
@@ -235,7 +235,7 @@
   <!-- Bit Depth + Metadata -->
   <div class="grid grid-cols-2 gap-2">
     <div>
-      <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.sampler.bit_depth')}<InfoTip text="8-bit is standard. 16-bit preserves more precision from the model's float32 output — useful if you plan to post-process in Photoshop/GIMP. Requires OpenCV in the ComfyUI environment." /></label>
+      <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.sampler.bit_depth')}<InfoTip text="8-bit is standard. 16-bit preserves more precision from the model's float32 output - useful if you plan to post-process in Photoshop/GIMP. Requires OpenCV in the ComfyUI environment." /></label>
       <div class="flex gap-1">
         {#each ["8bit", "16bit"] as depth}
           <button

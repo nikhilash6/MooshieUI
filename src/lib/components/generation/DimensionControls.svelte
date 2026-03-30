@@ -16,13 +16,23 @@
   let lastSyncedDimensions = "";
 
   /** Try to match persisted width/height back to a preset or simplified ratio. */
+  /** Compute dimensions for a given aspect ratio using the area-faithful formula. */
+  function dimsForAspect(aw: number, ah: number, side: number): { w: number; h: number } {
+    const area = side * side;
+    const wA = Math.round(Math.sqrt(area * (aw / ah)) / 8) * 8;
+    const hA = Math.max(8, Math.round(area / wA / 8) * 8);
+    const hB = Math.round(Math.sqrt(area * (ah / aw)) / 8) * 8;
+    const wB = Math.max(8, Math.round(area / hB / 8) * 8);
+    return Math.abs(wA * hA - area) <= Math.abs(wB * hB - area)
+      ? { w: wA, h: hA }
+      : { w: wB, h: hB };
+  }
+
   function inferAspectFromDimensions(w: number, h: number) {
     // Check presets first (exact match on resulting dimensions)
     for (const p of presets) {
-      const area = sideLength * sideLength;
-      const pw = Math.round(Math.sqrt(area * (p.w / p.h)) / 8) * 8;
-      const ph = Math.round(Math.sqrt(area * (p.h / p.w)) / 8) * 8;
-      if (pw === w && ph === h) {
+      const dims = dimsForAspect(p.w, p.h, sideLength);
+      if (dims.w === w && dims.h === h) {
         return { w: p.w, h: p.h };
       }
     }
@@ -79,15 +89,13 @@
   ];
 
   function recalc() {
-    const aw = Math.max(0.01, aspectW);
-    const ah = Math.max(0.01, aspectH);
-    const side = Math.max(64, sideLength);
-    // Target area = side², distributed across the aspect ratio
-    const area = side * side;
-    const w = Math.round(Math.sqrt(area * (aw / ah)) / 8) * 8;
-    const h = Math.round(Math.sqrt(area * (ah / aw)) / 8) * 8;
-    generation.width = w;
-    generation.height = h;
+    const dims = dimsForAspect(
+      Math.max(0.01, aspectW),
+      Math.max(0.01, aspectH),
+      Math.max(64, sideLength),
+    );
+    generation.width = dims.w;
+    generation.height = dims.h;
   }
 
   function applyPreset(w: number, h: number) {

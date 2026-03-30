@@ -628,6 +628,20 @@
           <div class="flex items-start gap-3">
             <input
               type="checkbox"
+              id="show-info-tips"
+              bind:checked={accessibility.showInfoTips}
+              onchange={() => accessibility.saveSettings()}
+              class="w-4 h-4 mt-0.5 accent-indigo-500 rounded"
+            />
+            <div>
+              <label for="show-info-tips" class="text-sm text-neutral-200">Show Info Tips</label>
+              <p class="text-[10px] text-neutral-500 mt-0.5">Show the (?) tooltip icons next to labels throughout the interface.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <input
+              type="checkbox"
               id="dyslexic-font"
               bind:checked={dyslexicFont}
               class="w-4 h-4 mt-0.5 accent-indigo-500 rounded"

@@ -4,6 +4,7 @@ export type VisionSimulatorMode = "none" | "protanopia" | "deuteranopia" | "trit
 
 class AccessibilityStore {
   visionSimulatorMode = $state<VisionSimulatorMode>("none");
+  showInfoTips = $state(true);
 
   constructor() {
     this.loadSettings();
@@ -17,6 +18,9 @@ class AccessibilityStore {
       if (parsed.visionSimulatorMode) {
         this.visionSimulatorMode = parsed.visionSimulatorMode;
       }
+      if (parsed.showInfoTips !== undefined) {
+        this.showInfoTips = parsed.showInfoTips;
+      }
     } catch (e) {
       console.error("Failed to load accessibility settings:", e);
     }
@@ -25,7 +29,8 @@ class AccessibilityStore {
   saveSettings() {
     try {
       localStorage.setItem(ACCESSIBILITY_SETTINGS_KEY, JSON.stringify({
-        visionSimulatorMode: this.visionSimulatorMode
+        visionSimulatorMode: this.visionSimulatorMode,
+        showInfoTips: this.showInfoTips
       }));
     } catch (e) {
       console.error("Failed to save accessibility settings:", e);

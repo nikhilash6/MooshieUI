@@ -524,7 +524,7 @@
 <div class="space-y-3">
   <!-- Checkpoint -->
   <div class="relative">
-    <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.model.checkpoint')}<InfoTip text="The AI model that generates your images. Different checkpoints are trained on different styles — anime, photorealism, illustration, etc." /></label>
+    <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.model.checkpoint')}<InfoTip text="The AI model that generates your images. Different checkpoints are trained on different styles - anime, photorealism, illustration, etc." /></label>
     <button
       class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-left text-neutral-100 hover:border-neutral-600 focus:outline-none focus:border-indigo-500 transition-colors truncate flex items-center gap-2"
       onclick={() => (showCheckpointDropdown = !showCheckpointDropdown)}
@@ -680,7 +680,7 @@
 
   <!-- VAE -->
   <div>
-    <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.model.vae')}<InfoTip text="Variational Auto-Encoder — converts between pixel images and the latent space the AI works in. 'Automatic' uses the one built into your checkpoint, which is usually best." /></label>
+    <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.model.vae')}<InfoTip text="Variational Auto-Encoder - converts between pixel images and the latent space the AI works in. 'Automatic' uses the one built into your checkpoint, which is usually best." /></label>
     <select
       bind:value={generation.vae}
       class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-100 focus:outline-none focus:border-indigo-500 transition-colors"
@@ -696,7 +696,7 @@
   <div>
     <div class="flex items-center justify-between mb-1.5">
       <div class="flex items-center gap-2">
-        <label class="text-xs text-neutral-400">LoRAs<InfoTip text="Low-Rank Adaptations — small add-on models that modify the checkpoint's style or teach it new concepts (characters, styles, objects) without replacing the whole model." /></label>
+        <label class="text-xs text-neutral-400">LoRAs<InfoTip text="Low-Rank Adaptations - small add-on models that modify the checkpoint's style or teach it new concepts (characters, styles, objects) without replacing the whole model." /></label>
         {#if activeLoraCount > 0}
           <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-600/20 text-indigo-400">
             {activeLoraCount} active

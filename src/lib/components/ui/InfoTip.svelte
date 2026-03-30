@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { accessibility } from "../../stores/accessibility.svelte.js";
+
   interface Props {
     text: string;
   }
@@ -6,6 +8,7 @@
   let { text }: Props = $props();
 </script>
 
+{#if accessibility.showInfoTips}
 <span class="inline-flex items-center ml-1">
   <button
     type="button"
@@ -15,4 +18,5 @@
     tabindex={0}
   >?</button>
 </span>
+{/if}
 

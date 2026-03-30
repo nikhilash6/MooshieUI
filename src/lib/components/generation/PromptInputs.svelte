@@ -310,7 +310,7 @@
   <div>
     <div class="flex items-center justify-between mb-1">
       <div class="flex items-center gap-1.5">
-        <label class="text-xs text-neutral-400">{locale.t('generation.prompts.positive')}<InfoTip text="Describe what you want to see in the image. Use commas to separate concepts. More specific prompts give better results — include style, subject, lighting, and quality tags." /></label>
+        <label class="text-xs text-neutral-400">{locale.t('generation.prompts.positive')}<InfoTip text="Describe what you want to see in the image. Use commas to separate concepts. More specific prompts give better results - include style, subject, lighting, and quality tags." /></label>
       </div>
       {#if generation.isAnima || generation.isIllustrious}
         <span class="shrink-0 text-[10px] px-2 py-0.5 rounded-full bg-emerald-600/20 text-emerald-400 border border-emerald-600/30">Quality prompts applied</span>

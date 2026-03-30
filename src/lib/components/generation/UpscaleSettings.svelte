@@ -144,7 +144,7 @@
   {#if generation.upscaleEnabled}
     <!-- Method -->
     <div>
-      <label class="block text-xs text-neutral-400 mb-1">Method<InfoTip text="'Model' uses an AI upscaler trained to add realistic detail when enlarging. 'Algorithmic' uses traditional Lanczos scaling — faster but won't add new detail." /></label>
+      <label class="block text-xs text-neutral-400 mb-1">Method<InfoTip text="'Model' uses an AI upscaler trained to add realistic detail when enlarging. 'Algorithmic' uses traditional Lanczos scaling - faster but won't add new detail." /></label>
       <select
         bind:value={generation.upscaleMethod}
         class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-100 focus:outline-none focus:border-indigo-500 transition-colors"
@@ -271,7 +271,7 @@
           class="w-4 h-4 accent-indigo-500 rounded"
         />
         <label for="upscale-tiling" class="text-xs text-neutral-400">
-          Tiled diffusion<InfoTip text="Processes the upscaled image in smaller overlapping tiles instead of all at once. Uses much less VRAM — essential for large images that would otherwise crash." />
+          Tiled diffusion<InfoTip text="Processes the upscaled image in smaller overlapping tiles instead of all at once. Uses much less VRAM - essential for large images that would otherwise crash." />
         </label>
       </div>
     {/if}

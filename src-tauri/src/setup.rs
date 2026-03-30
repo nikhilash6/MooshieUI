@@ -666,7 +666,32 @@ fn nvidia_pytorch_index_url() -> &'static str {
 }
 
 async fn step_install_pytorch(app: &AppHandle, base: &Path, gpu: &str) -> Result<(), String> {
-    match gpu {
+    // Spawn a heartbeat so the user sees activity during the long, silent download.
+    // uv produces no line output while downloading multi-GB CUDA wheels.
+    let app_hb = app.clone();
+    let heartbeat = tokio::spawn(async move {
+        let mut elapsed = 0u64;
+        loop {
+            tokio::time::sleep(std::time::Duration::from_secs(30)).await;
+            elapsed += 30;
+            let mins = elapsed / 60;
+            let secs = elapsed % 60;
+            let msg = if elapsed < 60 {
+                format!(
+                    "[{}s] Still working \u{2014} downloading PyTorch packages...",
+                    secs
+                )
+            } else {
+                format!(
+                    "[{}m {}s] Still working \u{2014} large GPU packages are downloading...",
+                    mins, secs
+                )
+            };
+            emit_log(&app_hb, &msg);
+        }
+    });
+
+    let result = match gpu {
         "nvidia" => {
             let index_url = nvidia_pytorch_index_url();
             emit_log(app, &format!("Using PyTorch index: {}", index_url));
@@ -695,6 +720,8 @@ async fn step_install_pytorch(app: &AppHandle, base: &Path, gpu: &str) -> Result
                     "torchaudio",
                     "--index-url",
                     index_url,
+                    "--extra-index-url",
+                    "https://pypi.org/simple/",
                 ],
             )
             .await
@@ -709,6 +736,8 @@ async fn step_install_pytorch(app: &AppHandle, base: &Path, gpu: &str) -> Result
                     "torchaudio",
                     "--index-url",
                     "https://download.pytorch.org/whl/xpu",
+                    "--extra-index-url",
+                    "https://pypi.org/simple/",
                 ],
             )
             .await
@@ -724,11 +753,16 @@ async fn step_install_pytorch(app: &AppHandle, base: &Path, gpu: &str) -> Result
                     "torchaudio",
                     "--index-url",
                     "https://download.pytorch.org/whl/cpu",
+                    "--extra-index-url",
+                    "https://pypi.org/simple/",
                 ],
             )
             .await
         }
-    }
+    };
+
+    heartbeat.abort();
+    result
 }
 
 async fn step_install_deps(app: &AppHandle, base: &Path) -> Result<(), String> {
@@ -1270,9 +1304,37 @@ pub async fn reinstall_pytorch(
     if !url.is_empty() {
         args.push("--index-url");
         args.push(url);
+        args.push("--extra-index-url");
+        args.push("https://pypi.org/simple/");
     }
 
-    uv_pip(&app, &base, &args).await?;
+    // Heartbeat so the user sees activity during the long silent download
+    let app_hb = app.clone();
+    let heartbeat = tokio::spawn(async move {
+        let mut elapsed = 0u64;
+        loop {
+            tokio::time::sleep(std::time::Duration::from_secs(30)).await;
+            elapsed += 30;
+            let mins = elapsed / 60;
+            let secs = elapsed % 60;
+            let msg = if elapsed < 60 {
+                format!(
+                    "[{}s] Still working \u{2014} downloading PyTorch packages...",
+                    secs
+                )
+            } else {
+                format!(
+                    "[{}m {}s] Still working \u{2014} large GPU packages are downloading...",
+                    mins, secs
+                )
+            };
+            emit_log(&app_hb, &msg);
+        }
+    });
+
+    let install_result = uv_pip(&app, &base, &args).await;
+    heartbeat.abort();
+    install_result?;
     emit(&app, "done", "PyTorch reinstalled successfully.", 100);
     Ok(())
 }

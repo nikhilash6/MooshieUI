@@ -61,6 +61,14 @@
         await installPipPackage("ultralytics");
       }
 
+      // Anima models produce poor results below 1024 — clamp to 1024² area preserving aspect ratio
+      if (generation.isAnima && (generation.width < 1024 || generation.height < 1024)) {
+        const ratio = generation.width / generation.height;
+        const area = 1024 * 1024;
+        generation.width = Math.round(Math.sqrt(area * ratio) / 8) * 8;
+        generation.height = Math.round(Math.sqrt(area / ratio) / 8) * 8;
+      }
+
       const params = generation.toParams();
       generation.saveCurrentPromptToHistory();
       const result = await generate(params);
