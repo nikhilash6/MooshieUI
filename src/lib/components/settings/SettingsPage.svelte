@@ -48,7 +48,7 @@
 
   async function handleExportLogs() {
     const destination = await saveDialog({
-      title: "Save Diagnostic Logs",
+      title: locale.t('settings.about.save_dialog_title'),
       defaultPath: "mooshieui-diagnostics.log",
       filters: [{ name: "Log Files", extensions: ["log", "txt"] }],
     });
@@ -634,8 +634,8 @@
               class="w-4 h-4 mt-0.5 accent-indigo-500 rounded"
             />
             <div>
-              <label for="show-info-tips" class="text-sm text-neutral-200">Show Info Tips</label>
-              <p class="text-[10px] text-neutral-500 mt-0.5">Show the (?) tooltip icons next to labels throughout the interface.</p>
+              <label for="show-info-tips" class="text-sm text-neutral-200">{locale.t('settings.appearance.show_info_tips_label')}</label>
+              <p class="text-[10px] text-neutral-500 mt-0.5">{locale.t('settings.appearance.show_info_tips_tip')}</p>
             </div>
           </div>
 
@@ -957,7 +957,7 @@
                     }
                   }}
                   class="flex-1 bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-indigo-500 transition-colors"
-                  placeholder="/path/to/shared/models (e.g. from another ComfyUI or Forge install)"
+                  placeholder={locale.t('settings.paths.extra_model_placeholder')}
                 />
                 {#if (config.extra_model_paths ?? "").split("\n").length > 1}
                   <button
@@ -1132,10 +1132,10 @@
                   disabled={!tagUrlInput.trim() || autocomplete.loading}
                   onclick={() => autocomplete.loadFromUrl(tagUrlInput.trim())}
                 >
-                  {autocomplete.loading ? "Loading..." : "Fetch"}
+                  {autocomplete.loading ? locale.t('settings.autocomplete.fetching') : locale.t('settings.autocomplete.fetch')}
                 </button>
               </div>
-              <p class="text-[10px] text-neutral-500 mt-0.5">JSON array or CSV (name,category,count,aliases...)</p>
+              <p class="text-[10px] text-neutral-500 mt-0.5">{locale.t('settings.autocomplete.format_hint')}</p>
             </div>
 
             <!-- Upload file -->
@@ -1145,7 +1145,7 @@
                 class="inline-flex items-center gap-2 px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-neutral-300 hover:border-indigo-500 transition-colors cursor-pointer"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                {tagFileLoading ? "Reading..." : "Choose .json or .csv"}
+                {tagFileLoading ? locale.t('settings.autocomplete.reading_file') : locale.t('settings.autocomplete.choose_file')}
                 <input
                   type="file"
                   accept=".json,.csv,.txt"
@@ -1173,7 +1173,7 @@
               class="text-xs text-neutral-400 hover:text-neutral-200 underline transition-colors"
               onclick={() => autocomplete.resetToBuiltin()}
             >
-              Reset to built-in Danbooru tags
+              {locale.t('settings.autocomplete.reset_builtin')}
             </button>
             {/if}
 
@@ -1199,12 +1199,12 @@
                 step="1"
                 class="w-full accent-indigo-500"
               />
-              <p class="text-[10px] text-neutral-500 mt-0.5">Number of autocomplete results shown in the dropdown</p>
+              <p class="text-[10px] text-neutral-500 mt-0.5">{locale.t('settings.autocomplete.results_hint')}</p>
             </div>
 
             <!-- Undo/redo hint -->
             <div class="px-3 py-2 bg-neutral-800/50 border border-neutral-700/50 rounded-lg text-[10px] text-neutral-500">
-              Tip: Use <kbd class="px-1 py-0.5 bg-neutral-700 rounded text-neutral-300">Ctrl+Z</kbd> / <kbd class="px-1 py-0.5 bg-neutral-700 rounded text-neutral-300">Ctrl+Y</kbd> in the prompt box to undo/redo autocompleted tags.
+              {locale.t('settings.autocomplete.undo_redo_tip')}
             </div>
           </div>
           {/if}
@@ -1220,7 +1220,7 @@
           >
             <span class="flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              Interrogator
+              {locale.t('settings.interrogator.title')}
             </span>
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-neutral-500 transition-transform {collapsed.interrogator ? '' : 'rotate-180'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
@@ -1228,7 +1228,7 @@
           {#if !collapsed.interrogator}
           <div class="px-5 pb-5 space-y-4">
             <p class="text-[10px] text-neutral-500">
-              Controls confidence thresholds for the image interrogator (pixai-tagger). Lower values return more tags, higher values are more selective.
+              {locale.t('settings.interrogator.thresholds_desc')}
             </p>
 
             <div>
@@ -1246,8 +1246,8 @@
                 class="w-full accent-indigo-500"
               />
               <div class="flex justify-between text-[10px] text-neutral-600 mt-0.5">
-                <span>More tags</span>
-                <span>Fewer tags</span>
+                <span>{locale.t('settings.interrogator.more_tags')}</span>
+                <span>{locale.t('settings.interrogator.fewer_tags')}</span>
               </div>
             </div>
 
@@ -1266,8 +1266,8 @@
                 class="w-full accent-indigo-500"
               />
               <div class="flex justify-between text-[10px] text-neutral-600 mt-0.5">
-                <span>More tags</span>
-                <span>Fewer tags</span>
+                <span>{locale.t('settings.interrogator.more_tags')}</span>
+                <span>{locale.t('settings.interrogator.fewer_tags')}</span>
               </div>
             </div>
           </div>
@@ -1395,14 +1395,14 @@
                   onclick={checkForUpdates}
                   class="text-xs text-neutral-500 hover:text-neutral-300 transition-colors cursor-pointer"
                 >
-                  Try again
+                  {locale.t('settings.about.try_again')}
                 </button>
               {/if}
             </div>
 
             <!-- Troubleshooting -->
             <div class="space-y-2">
-              <p class="text-xs text-neutral-400">Troubleshooting</p>
+              <p class="text-xs text-neutral-400">{locale.t('settings.about.troubleshooting')}</p>
               <div class="flex items-center gap-3">
                 <button
                   onclick={handleExportLogs}
@@ -1416,17 +1416,17 @@
                   {/if}
                 </button>
                 {#if logExportDone}
-                  <span class="text-xs text-emerald-400">Saved!</span>
+                  <span class="text-xs text-emerald-400">{locale.t('settings.about.saved')}</span>
                 {/if}
               </div>
               {#if logExportError}
                 <p class="text-xs text-red-400">{logExportError}</p>
               {/if}
-              <p class="text-[11px] text-neutral-500">Save ComfyUI logs, system info, and config to a file for sharing with support.</p>
+              <p class="text-[11px] text-neutral-500">{locale.t('settings.about.export_logs_desc')}</p>
             </div>
 
             <div class="rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2">
-              <p class="text-[11px] text-neutral-500">To install on a different drive, set the <span class="font-mono text-neutral-400">MOOSHIEUI_DATA_DIR</span> environment variable to your preferred path before launching.</p>
+              <p class="text-[11px] text-neutral-500">{locale.t('settings.about.data_dir_hint')}</p>
             </div>
           </div>
           {/if}

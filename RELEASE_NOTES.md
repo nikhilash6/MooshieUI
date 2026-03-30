@@ -1,3 +1,20 @@
+## What's New in v0.4.8
+
+### Full Internationalization
+- Added 9 new languages: Japanese, French, Korean, Chinese (Simplified), Chinese (Traditional), German, Portuguese, Russian, and Italian
+- Language selector in Settings → Appearance now lists all 11 supported locales
+
+### Complete i18n Coverage
+- Replaced all remaining hardcoded English strings across 11 generation, settings, and canvas components with `locale.t()` calls
+- Added 100+ new locale keys covering tooltips, placeholders, ControlNet presets, model selectors, autocomplete settings, and more
+- Every key (743 total) is now present in all 11 locale files with proper native translations
+
+### Locale Cleanup
+- Removed unused duplicate locale keys across all locale files
+- Verified key parity: 0 missing keys across all languages
+
+---
+
 ## What's New in v0.4.7
 
 ### PyTorch Install Heartbeat

@@ -124,7 +124,7 @@
 <div class="space-y-3">
   <!-- Enable toggle -->
   <div class="flex items-center justify-between">
-    <label class="text-xs text-neutral-400">{locale.t('generation.upscale.title')}<InfoTip text="Increases the resolution of your generated image. 'Model' uses an AI upscaler for sharp detail, 'Algorithmic' uses traditional scaling. Adds a second pass after initial generation." /></label>
+    <label class="text-xs text-neutral-400">{locale.t('generation.upscale.title')}<InfoTip text={locale.t('generation.upscale.tip')} /></label>
     <button
       class="relative w-10 h-5 rounded-full transition-colors {generation.upscaleEnabled
         ? 'bg-indigo-600'
@@ -144,13 +144,13 @@
   {#if generation.upscaleEnabled}
     <!-- Method -->
     <div>
-      <label class="block text-xs text-neutral-400 mb-1">Method<InfoTip text="'Model' uses an AI upscaler trained to add realistic detail when enlarging. 'Algorithmic' uses traditional Lanczos scaling - faster but won't add new detail." /></label>
+      <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.upscale.method_label')}<InfoTip text={locale.t('generation.upscale.method_tip')} /></label>
       <select
         bind:value={generation.upscaleMethod}
         class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-100 focus:outline-none focus:border-indigo-500 transition-colors"
       >
-        <option value="model">Model (Upscaler)</option>
-        <option value="algorithmic">Algorithmic</option>
+        <option value="model">{locale.t('generation.upscale.method_model_option')}</option>
+        <option value="algorithmic">{locale.t('generation.upscale.method_algorithmic_option')}</option>
       </select>
     </div>
 
@@ -158,7 +158,7 @@
       <!-- Scale -->
       <div>
         <label class="flex items-center justify-between text-xs text-neutral-400 mb-1">
-          <span>{locale.t('generation.upscale.scale')}<InfoTip text="How much to enlarge the image. 2x doubles the resolution in each dimension (4x the pixels). Higher scales take longer and use more VRAM." /></span>
+          <span>{locale.t('generation.upscale.scale')}<InfoTip text={locale.t('generation.upscale.scale_tip')} /></span>
           <EditableValue value={generation.upscaleScale} min={1} max={4} step={0.5} decimals={1} suffix="x" onchange={(v) => generation.upscaleScale = v} />
         </label>
         <input
@@ -175,14 +175,14 @@
     <!-- Upscale Model (only for model method) -->
     {#if generation.upscaleMethod === "model"}
       <div>
-        <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.upscale.model')}<InfoTip text="The AI model used to upscale your image. Omni 2x doubles resolution, Omni 4x quadruples it. Recommended models will be downloaded automatically on first use." /></label>
+        <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.upscale.model')}<InfoTip text={locale.t('generation.upscale.model_tip')} /></label>
         <select
           value={generation.upscaleModel ?? ""}
           onchange={(e) => handleModelSelect((e.target as HTMLSelectElement).value)}
           disabled={downloading !== null}
           class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-100 focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-50"
         >
-          <option value="">Select model...</option>
+          <option value="">{locale.t('generation.upscale.select_model')}</option>
           {#each getModelOptions() as opt}
             <option value={opt.value}>{opt.label}</option>
           {/each}
@@ -190,7 +190,7 @@
         {#if downloading}
           <div class="mt-2 bg-neutral-800/80 rounded-lg px-3 py-2">
             <div class="flex items-center justify-between text-[11px] text-neutral-400 mb-1">
-              <span class="truncate mr-2">Downloading {downloading}...</span>
+              <span class="truncate mr-2">{locale.t('generation.upscale.downloading', { model: downloading || '' })}</span>
               {#if dlTotal > 0}
                 <span class="shrink-0 tabular-nums">{formatBytes(dlBytes)} / {formatBytes(dlTotal)} ({dlPercent}%)</span>
               {/if}
@@ -219,7 +219,7 @@
       <!-- Denoise -->
       <div>
         <label class="flex items-center justify-between text-xs text-neutral-400 mb-1">
-          <span>{locale.t('generation.upscale.denoise')}<InfoTip text="How much the AI re-draws during upscaling. Lower (0.2-0.4) preserves the original closely, higher adds more detail but may change the image." /></span>
+          <span>{locale.t('generation.upscale.denoise')}<InfoTip text={locale.t('generation.upscale.denoise_tip')} /></span>
           <EditableValue value={generation.upscaleDenoise} min={0} max={1} step={0.05} decimals={2} onchange={(v) => generation.upscaleDenoise = v} />
         </label>
         <input
@@ -235,7 +235,7 @@
       <!-- Steps -->
       <div>
         <label class="flex items-center justify-between text-xs text-neutral-400 mb-1">
-          <span>{locale.t('generation.upscale.steps')}<InfoTip text="Denoising steps during the upscale pass. More steps = finer detail but slower. 10-20 is usually enough for upscaling." /></span>
+          <span>{locale.t('generation.upscale.steps')}<InfoTip text={locale.t('generation.upscale.steps_tip')} /></span>
           <EditableValue value={generation.upscaleSteps} min={1} max={50} step={1} onchange={(v) => generation.upscaleSteps = v} />
         </label>
         <input
@@ -259,7 +259,7 @@
           class="w-4 h-4 accent-indigo-500 rounded opacity-50"
         />
         <label class="text-xs text-neutral-400">
-          Tiled diffusion (always on for Anima)<InfoTip text="Tiled diffusion is required for Anima to handle its 5D latent format. The image is split into overlapping tiles, each refined independently, then blended back together seamlessly." />
+          {locale.t('generation.upscale.tiling_forced_label')}<InfoTip text={locale.t('generation.upscale.tiling_forced_tip')} />
         </label>
       </div>
     {:else}
@@ -271,7 +271,7 @@
           class="w-4 h-4 accent-indigo-500 rounded"
         />
         <label for="upscale-tiling" class="text-xs text-neutral-400">
-          Tiled diffusion<InfoTip text="Processes the upscaled image in smaller overlapping tiles instead of all at once. Uses much less VRAM - essential for large images that would otherwise crash." />
+          {locale.t('generation.upscale.tiling_label')}<InfoTip text={locale.t('generation.upscale.tiling_tip')} />
         </label>
       </div>
     {/if}
@@ -280,7 +280,7 @@
     {#if generation.upscaleTiling || generation.isAnima}
     <div>
       <label class="flex items-center justify-between text-xs text-neutral-400 mb-1">
-        <span>{locale.t('generation.upscale.tile_size')}<InfoTip text="The size of each tile when using tiled diffusion. Larger tiles = better coherence but more VRAM. 1024px is a good default. Reduce to 512-768 if you run out of memory." /></span>
+        <span>{locale.t('generation.upscale.tile_size')}<InfoTip text={locale.t('generation.upscale.tile_size_tip')} /></span>
         <EditableValue value={generation.upscaleTileSize} min={256} max={2048} step={64} suffix="px" onchange={(v) => generation.upscaleTileSize = v} />
       </label>
       <input

@@ -83,14 +83,14 @@
     <div class="rounded-lg border border-indigo-700/50 bg-indigo-900/15 p-2.5">
       <div class="flex items-start justify-between gap-2">
         <div>
-          <p class="text-xs text-indigo-300 font-medium">Anima Recommended Settings</p>
-          <p class="text-[11px] text-neutral-300 mt-0.5">30 steps, CFG 4, sampler `er_sde` (from Anima model card guidance).</p>
+          <p class="text-xs text-indigo-300 font-medium">{locale.t('generation.sampler.anima_recommended')}</p>
+          <p class="text-[11px] text-neutral-300 mt-0.5">{locale.t('generation.sampler.anima_hint')}</p>
         </div>
         <button
           class="px-2 py-1 text-[10px] rounded border border-indigo-500/70 text-indigo-200 hover:border-indigo-400 hover:text-indigo-100 transition-colors"
           onclick={applyAnimaRecommendation}
         >
-          Apply
+          {locale.t('common.apply')}
         </button>
       </div>
     </div>
@@ -100,14 +100,14 @@
     <div class="rounded-lg border border-neutral-700 bg-neutral-900/60 p-2.5">
       <div class="flex items-start justify-between gap-2">
         <div>
-          <p class="text-xs text-neutral-300 font-medium">SIH Recommended Settings</p>
-          <p class="text-[11px] text-neutral-400 mt-0.5">No public SIH model-card settings found; using project defaults: 20 steps, CFG 1.4, `euler_cfg_pp`, `sgm_uniform`.</p>
+          <p class="text-xs text-neutral-300 font-medium">{locale.t('generation.sampler.sih_recommended')}</p>
+          <p class="text-[11px] text-neutral-400 mt-0.5">{locale.t('generation.sampler.sih_hint')}</p>
         </div>
         <button
           class="px-2 py-1 text-[10px] rounded border border-neutral-600 text-neutral-300 hover:border-neutral-500 hover:text-neutral-200 transition-colors"
           onclick={applySihRecommendation}
         >
-          Apply
+          {locale.t('common.apply')}
         </button>
       </div>
     </div>
@@ -116,7 +116,7 @@
   <!-- Sampler + Scheduler -->
   <div class="grid grid-cols-2 gap-2">
     <div>
-      <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.sampler.label')}<InfoTip text="The algorithm used to progressively remove noise from the image. Different samplers produce different results - 'euler' is fast and reliable, 'dpmpp' variants offer higher quality, 'ancestral' ones add randomness for variety." /></label>
+      <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.sampler.label')}<InfoTip text={locale.t('generation.sampler.label_tip')} /></label>
       <select
         bind:value={generation.samplerName}
         onchange={onSamplerChange}
@@ -128,7 +128,7 @@
       </select>
     </div>
     <div>
-      <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.sampler.scheduler')}<InfoTip text="Controls how noise is distributed across steps. 'normal' is standard, 'karras' front-loads detail work for sharper results, 'sgm_uniform' spaces steps evenly." /></label>
+      <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.sampler.scheduler')}<InfoTip text={locale.t('generation.sampler.scheduler_tip')} /></label>
       <select
         bind:value={generation.scheduler}
         class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-2 py-1.5 text-xs text-neutral-100 focus:outline-none focus:border-indigo-500 transition-colors"
@@ -144,7 +144,7 @@
   <div class="grid grid-cols-2 gap-2">
     <div>
       <label class="flex items-center justify-between text-xs text-neutral-400 mb-1">
-        <span>{locale.t('generation.sampler.steps')}<InfoTip text="How many denoising iterations to run. More steps = finer detail but slower. 20-30 is a good balance for most samplers. Some (like 'euler') converge fast and don't benefit much beyond 25." /></span>
+        <span>{locale.t('generation.sampler.steps')}<InfoTip text={locale.t('generation.sampler.steps_tip')} /></span>
         <EditableValue value={generation.steps} min={1} max={150} step={1} onchange={(v) => generation.steps = v} />
       </label>
       <input
@@ -158,7 +158,7 @@
     </div>
     <div>
       <label class="flex items-center justify-between text-xs text-neutral-400 mb-1">
-        <span>{locale.t('generation.sampler.cfg')}<InfoTip text="Classifier-Free Guidance - how closely the AI follows your prompt. Higher = more literal but can look artificial. Lower = more creative but may ignore parts of your prompt. CFG++ samplers work best around 1-2." /></span>
+        <span>{locale.t('generation.sampler.cfg')}<InfoTip text={locale.t('generation.sampler.cfg_tip')} /></span>
         <EditableValue value={generation.cfg} min={0} max={30} step={0.1} decimals={1} onchange={(v) => generation.cfg = v} />
       </label>
       <input
@@ -193,7 +193,7 @@
   <div class="grid grid-cols-2 gap-2">
     <div>
       <label class="flex items-center justify-between text-xs text-neutral-400 mb-1">
-        <span>{locale.t('generation.sampler.seed')}<InfoTip text="A number that determines the 'randomness' of your image. Same seed + same settings = same image. Use 'Random' for variety, or set a specific seed to reproduce or iterate on a result." /></span>
+        <span>{locale.t('generation.sampler.seed')}<InfoTip text={locale.t('generation.sampler.seed_tip')} /></span>
         <button
           class="text-[10px] px-1.5 py-0.5 rounded {randomSeed
             ? 'bg-indigo-600 text-white'
@@ -212,13 +212,13 @@
         />
       {:else}
         <div class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-2 py-1.5 text-xs text-neutral-500">
-          Random
+          {locale.t('generation.sampler.random_display')}
         </div>
       {/if}
     </div>
     <div>
       <label class="flex items-center justify-between text-xs text-neutral-400 mb-1">
-        <span>{locale.t('generation.sampler.batch')}<InfoTip text="How many images to generate at once. Higher values use more VRAM but let you compare results quickly. Each image uses the same prompt but a different seed." /></span>
+        <span>{locale.t('generation.sampler.batch')}<InfoTip text={locale.t('generation.sampler.batch_tip')} /></span>
         <EditableValue value={generation.batchSize} min={1} max={8} step={1} onchange={(v) => generation.batchSize = v} />
       </label>
       <input
@@ -235,7 +235,7 @@
   <!-- Bit Depth + Metadata -->
   <div class="grid grid-cols-2 gap-2">
     <div>
-      <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.sampler.bit_depth')}<InfoTip text="8-bit is standard. 16-bit preserves more precision from the model's float32 output - useful if you plan to post-process in Photoshop/GIMP. Requires OpenCV in the ComfyUI environment." /></label>
+      <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.sampler.bit_depth')}<InfoTip text={locale.t('generation.sampler.bit_depth_tip')} /></label>
       <div class="flex gap-1">
         {#each ["8bit", "16bit"] as depth}
           <button
@@ -250,7 +250,7 @@
       </div>
     </div>
     <div>
-      <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.sampler.metadata')}<InfoTip text="How generation parameters are saved into images. 'Text Chunk' is standard PNG metadata (fast, widely supported). 'Stealth Alpha' hides metadata in the alpha channel and can survive social media re-uploads that strip PNG chunks. 'Both' writes to both locations. For 16-bit PNGs, selecting Stealth Alpha is automatically upgraded to Both for better compatibility." /></label>
+      <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.sampler.metadata')}<InfoTip text={locale.t('generation.sampler.metadata_tip')} /></label>
       <div class="flex gap-1">
         {#each [["text_chunk", locale.t('generation.sampler.metadata_text')], ["stealth", locale.t('generation.sampler.metadata_stealth')], ["both", locale.t('generation.sampler.metadata_both')]] as [value, label]}
           <button
@@ -267,7 +267,7 @@
   </div>
   {#if metadataUpgradedToBoth}
     <p class="text-[10px] text-indigo-300 -mt-1">
-      16-bit active — Stealth Alpha upgraded to Both.
+      {locale.t('generation.sampler.metadata_upgraded')}
     </p>
   {/if}
 

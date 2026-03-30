@@ -109,7 +109,7 @@
 <div class="space-y-3">
   <!-- Enable toggle -->
   <div class="flex items-center justify-between">
-    <label class="text-xs text-neutral-400">{locale.t('generation.facefix.title')}<InfoTip text="Detects faces in the generated image using YOLOv8 and re-denoises each face region for better detail. Runs after generation (and after upscale if enabled)." /></label>
+    <label class="text-xs text-neutral-400">{locale.t('generation.facefix.title')}<InfoTip text={locale.t('generation.facefix.tip')} /></label>
     <button
       class="relative w-10 h-5 rounded-full transition-colors {generation.facefixEnabled
         ? 'bg-indigo-600'
@@ -129,14 +129,14 @@
   {#if generation.facefixEnabled}
     <!-- Detector Model -->
     <div>
-      <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.facefix.detector')}<InfoTip text="The YOLOv8 model used to detect faces. 'yolov8m' is more accurate, 'yolov8n' is faster and lighter. Models are downloaded automatically on first use." /></label>
+      <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.facefix.detector')}<InfoTip text={locale.t('generation.facefix.detector_tip')} /></label>
       <select
         value={generation.facefixDetector ?? ""}
         onchange={(e) => handleModelSelect((e.target as HTMLSelectElement).value)}
         disabled={downloading !== null}
         class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-100 focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-50"
       >
-        <option value="">Select model...</option>
+        <option value="">{locale.t('generation.facefix.select_model')}</option>
         {#each getModelOptions() as opt}
           <option value={opt.value}>{opt.label}</option>
         {/each}
@@ -144,7 +144,7 @@
       {#if downloading}
         <div class="mt-2 bg-neutral-800/80 rounded-lg px-3 py-2">
           <div class="flex items-center justify-between text-[11px] text-neutral-400 mb-1">
-            <span class="truncate mr-2">Downloading {downloading}...</span>
+            <span class="truncate mr-2">{locale.t('generation.facefix.downloading', { model: downloading || '' })}</span>
             {#if dlTotal > 0}
               <span class="shrink-0 tabular-nums">{formatBytes(dlBytes)} / {formatBytes(dlTotal)} ({dlPercent}%)</span>
             {/if}
@@ -172,7 +172,7 @@
       <!-- Denoise -->
       <div>
         <label class="flex items-center justify-between text-xs text-neutral-400 mb-1">
-          <span>{locale.t('generation.facefix.denoise')}<InfoTip text="How much the AI re-draws each detected face. Lower values (0.2-0.4) preserve the original face closely, higher values add more detail but may change facial features." /></span>
+          <span>{locale.t('generation.facefix.denoise')}<InfoTip text={locale.t('generation.facefix.denoise_tip')} /></span>
           <EditableValue value={generation.facefixDenoise} min={0} max={1} step={0.05} decimals={2} onchange={(v) => generation.facefixDenoise = v} />
         </label>
         <input
@@ -188,7 +188,7 @@
       <!-- Steps -->
       <div>
         <label class="flex items-center justify-between text-xs text-neutral-400 mb-1">
-          <span>{locale.t('generation.facefix.steps')}<InfoTip text="Denoising steps for each face region. More steps = finer detail but slower. 15-25 is usually enough." /></span>
+          <span>{locale.t('generation.facefix.steps')}<InfoTip text={locale.t('generation.facefix.steps_tip')} /></span>
           <EditableValue value={generation.facefixSteps} min={1} max={50} step={1} onchange={(v) => generation.facefixSteps = v} />
         </label>
         <input
@@ -205,7 +205,7 @@
     <!-- Guide Size -->
     <div>
       <label class="flex items-center justify-between text-xs text-neutral-400 mb-1">
-        <span>{locale.t('generation.facefix.guide_size')}<InfoTip text="The resolution each detected face is scaled to before denoising. Higher = more detail but uses more VRAM. 512 is a good default for most models." /></span>
+        <span>{locale.t('generation.facefix.guide_size')}<InfoTip text={locale.t('generation.facefix.guide_size_tip')} /></span>
         <EditableValue value={generation.facefixGuideSize} min={256} max={1024} step={64} suffix="px" onchange={(v) => generation.facefixGuideSize = v} />
       </label>
       <input

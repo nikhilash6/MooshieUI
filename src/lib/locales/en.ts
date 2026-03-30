@@ -219,6 +219,9 @@ const en: Record<string, string> = {
   "generation.prompts.style_preset": "Style Preset",
   "generation.prompts.style_preset_tip": "Fooocus-style presets that automatically inject prompt modifiers. Great for fast starts: pick a style first, then write your subject prompt.",
   "generation.prompts.history": "Prompt History",
+  "generation.prompts.history_tip": "Recent prompts are auto-saved when you generate. Click to reload, star favorites to pin them to the top.",
+  "generation.prompts.quality_applied": "Quality prompts applied",
+  "generation.prompts.anima_artist_tip": "Tip: Start artist tags with @ (e.g. @artist_name)",
 
   // Style presets
   "generation.style.none": "None",
@@ -252,6 +255,7 @@ const en: Record<string, string> = {
   "generation.sampler.seed": "Seed",
   "generation.sampler.seed_tip": "A number that determines the 'randomness' of your image. Same seed + same settings = same image. Use 'Random' for variety, or set a specific seed to reproduce or iterate on a result.",
   "generation.sampler.seed_random": "Rng",
+  "generation.sampler.random_display": "Random",
   "generation.sampler.batch": "Batch",
   "generation.sampler.batch_tip": "How many images to generate at once. Higher values use more VRAM but let you compare results quickly. Each image uses the same prompt but a different seed.",
   "generation.sampler.denoise": "Denoise",
@@ -275,7 +279,7 @@ const en: Record<string, string> = {
   // Model
   "generation.model.title": "Model",
   "generation.model.checkpoint": "Checkpoint",
-  "generation.model.checkpoint_tip": "The main diffusion model. SIH-1.5 is fast and realistic, Anima focuses on illustration, SDXL is versatile.",
+  "generation.model.checkpoint_tip": "The AI model that generates your images. Different checkpoints are trained on different styles - anime, photorealism, illustration, etc.",
   "generation.model.vae": "VAE",
   "generation.model.recommended": "Recommended Models",
   "generation.model.download_required": "Download required",
@@ -284,6 +288,25 @@ const en: Record<string, string> = {
   "generation.model.split_model": "Use Split Model Components",
   "generation.model.diffusion_model": "Diffusion Model",
   "generation.model.clip_model": "CLIP Model",
+  "generation.model.vae_tip": "Variational Auto-Encoder — converts between pixel images and the latent space the AI works in. 'Automatic' uses the one built into your checkpoint, which is usually best.",
+  "generation.model.lora_tip": "Low-Rank Adaptations — small add-on models that modify the checkpoint's style or teach it new concepts (characters, styles, objects) without replacing the whole model.",
+  "generation.model.lora_strength_model_tip": "How strongly this LoRA affects the image generation model. Higher values = stronger effect, but too high can distort the image.",
+  "generation.model.lora_strength_clip_tip": "How strongly this LoRA affects text understanding. Controls how much the LoRA changes what the AI 'sees' in your prompt.",
+  "generation.model.select_checkpoint": "Select checkpoint...",
+  "generation.model.auto_vae": "Automatic (from checkpoint)",
+  "generation.model.lora_title": "LoRAs",
+  "generation.model.add_lora": "+ Add LoRA",
+  "generation.model.select_lora": "Select LoRA...",
+  "generation.model.search_loras": "Search LoRAs...",
+  "generation.model.search_placeholder": "Search...",
+  "generation.model.no_modelspec": "No ModelSpec metadata",
+  "generation.model.show_model_info": "Show model info",
+  "generation.model.hide_model_info": "Hide model info",
+  "generation.model.downloading_diffusion": "Downloading diffusion model...",
+  "generation.model.downloading_text_encoder": "Downloading text encoder...",
+  "generation.model.downloading_vae": "Downloading VAE...",
+  "generation.model.downloading_checkpoint": "Downloading checkpoint...",
+  "generation.model.auto_download": "auto-download",
 
   // Image inputs
   "generation.image.title": "Image Inputs",
@@ -291,13 +314,18 @@ const en: Record<string, string> = {
   "generation.image.drop_or": "Drop image here or",
   "generation.image.uploading": "Uploading...",
   "generation.image.drag_desc": "Drag an existing generation here to load it for editing.",
+  "generation.image.denoise": "Denoise",
+  "generation.image.denoise_tip": "How much the AI changes the input image. 0 = no change, 1 = completely new image ignoring the input. Lower values (0.3-0.5) keep the original composition, higher values (0.6-0.8) allow more creative freedom.",
 
   // Inpainting
   "generation.inpaint.title": "Inpainting & Layers",
   "generation.inpaint.mask": "Mask Image",
   "generation.inpaint.canvas_editor": "Canvas Editor",
   "generation.inpaint.grow_mask": "Grow Mask By",
+  "generation.inpaint.grow_mask_tip": "Expands the masked area by this many pixels. Helps blend the inpainted region into the surrounding image for seamless results.",
   "generation.inpaint.differential": "Differential Diffusion",
+  "generation.inpaint.differential_diffusion": "Differential Diffusion",
+  "generation.inpaint.differential_tip": "Recommended for v-pred / Anima style models during inpainting unless you are using a CFG++ sampler. Helps preserve source structure while editing masked regions.",
 
   // ControlNet
   "generation.controlnet.title": "ControlNet",
@@ -316,6 +344,18 @@ const en: Record<string, string> = {
   "generation.controlnet.pip_step": "Installing dependencies...",
   "generation.controlnet.restart_step": "Restarting ComfyUI...",
   "generation.controlnet.verify_step": "Verifying installation...",
+  "generation.controlnet.controlnet_model": "ControlNet Model",
+  "generation.controlnet.model_tip": "The ControlNet model file from your models/controlnet/ folder. Download models from the Model Hub or place them manually.",
+  "generation.controlnet.image_tip": "The reference image for ControlNet. In preset mode, this image will be processed (e.g. edge detection) before being used as guidance.",
+  "generation.controlnet.use_preprocessor": "Use preprocessor",
+  "generation.controlnet.preprocessor_label": "Preprocessor",
+  "generation.controlnet.preprocessor_placeholder": "e.g. CannyEdgePreprocessor",
+  "generation.controlnet.control_image_label": "Control Image",
+  "generation.controlnet.downloading": "Downloading {model}...",
+  "generation.controlnet.not_available": "Not available for this model",
+  "generation.controlnet.installing_step": "Installing...",
+  "generation.controlnet.strength_tip": "How strongly the ControlNet guides the generation. Higher values follow the control image more closely but may reduce creativity.",
+  "generation.controlnet.select_model": "Select model...",
 
   // Face Fix
   "generation.facefix.title": "Face Fix",
@@ -333,6 +373,7 @@ const en: Record<string, string> = {
   "generation.facefix.max_faces": "Max Faces",
   "generation.facefix.downloading": "Downloading {model}...",
   "generation.facefix.download_failed": "Download failed: {error}",
+  "generation.facefix.select_model": "Select model...",
 
   // Upscale
   "generation.upscale.title": "Upscale",
@@ -348,6 +389,19 @@ const en: Record<string, string> = {
   "generation.upscale.method_model": "Model",
   "generation.upscale.tile_size": "Tile Size",
   "generation.upscale.tiling": "Tiled Diffusion",
+
+  "generation.upscale.method_tip": "'Model' uses an AI upscaler trained to add realistic detail when enlarging. 'Algorithmic' uses traditional Lanczos scaling — faster but won't add new detail.",
+  "generation.upscale.scale_tip": "How much to enlarge the image. 2x doubles the resolution in each dimension (4x the pixels). Higher scales take longer and use more VRAM.",
+  "generation.upscale.model_tip": "The AI model used to upscale your image. Omni 2x doubles resolution, Omni 4x quadruples it. Recommended models will be downloaded automatically on first use.",
+  "generation.upscale.tiling_tip": "Processes the upscaled image in smaller overlapping tiles instead of all at once. Uses much less VRAM — essential for large images that would otherwise crash.",
+  "generation.upscale.tiling_forced_tip": "Tiled diffusion is required for Anima to handle its 5D latent format. The image is split into overlapping tiles, each refined independently, then blended back together seamlessly.",
+  "generation.upscale.tile_size_tip": "The size of each tile when using tiled diffusion. Larger tiles = better coherence but more VRAM. 1024px is a good default. Reduce to 512-768 if you run out of memory.",
+  "generation.upscale.method_model_option": "Model (Upscaler)",
+  "generation.upscale.method_algorithmic_option": "Algorithmic",
+  "generation.upscale.downloading": "Downloading {model}...",
+  "generation.upscale.tiling_label": "Tiled diffusion",
+  "generation.upscale.tiling_forced_label": "Tiled diffusion (always on for Anima)",
+  "generation.upscale.select_model": "Select model...",
 
   // Upscale History
   "generation.upscale_history.title": "Upscale History",
@@ -368,6 +422,22 @@ const en: Record<string, string> = {
   "generation.interrogate.paste": "Ctrl+V Paste",
   "generation.interrogate.choose_file": "Choose File...",
   "generation.interrogate.error": "Interrogation error",
+  "generation.interrogate.select_image": "Select Image",
+  "generation.interrogate.drop_hint": "Drag & drop, paste from clipboard, or browse to select an image",
+  "generation.interrogate.downloading_model": "Downloading interrogator model...",
+  "generation.interrogate.loading_model": "Loading model (first time may take a while)...",
+  "generation.interrogate.running_inference": "Running inference...",
+  "generation.interrogate.preparing": "Preparing...",
+  "generation.interrogate.cpu_hint": "CPU inference can take 10-30 seconds",
+  "generation.interrogate.failed": "Interrogation failed",
+  "generation.interrogate.rating": "Rating:",
+  "generation.interrogate.characters": "Characters ({count})",
+  "generation.interrogate.artists": "Artists ({count})",
+  "generation.interrogate.general": "General ({count})",
+  "generation.interrogate.copyright_label": "Copyright ({count})",
+  "generation.interrogate.select_all": "Select All",
+  "generation.interrogate.deselect_all": "Deselect All",
+  "generation.interrogate.apply_to_prompt": "Apply to Prompt",
 
   // ── Progress / Preview ──────────────────────────────────
   "progress.generating": "Generating...",
@@ -705,6 +775,75 @@ const en: Record<string, string> = {
   "canvas.move_up_title": "Move layer up",
   "canvas.move_down": "Move Down",
   "canvas.move_down_title": "Move layer down",
+  "canvas.hide_layer": "Hide layer",
+  "canvas.show_layer": "Show layer",
+  "canvas.lock_layer": "Lock layer",
+  "canvas.unlock_layer": "Unlock layer",
+
+  // ── Settings extras ─────────────────────────────────────
+  "settings.appearance.show_info_tips_label": "Show Info Tips",
+  "settings.appearance.show_info_tips_tip": "Show the (?) tooltip icons next to labels throughout the interface.",
+
+  "settings.autocomplete.format_hint": "JSON array or CSV (name,category,count,aliases...)",
+  "settings.autocomplete.choose_file": "Choose .json or .csv",
+  "settings.autocomplete.reading_file": "Reading...",
+  "settings.autocomplete.results_hint": "Number of autocomplete results shown in the dropdown",
+  "settings.autocomplete.undo_redo_tip": "Tip: Use Ctrl+Z / Ctrl+Y in the prompt box to undo/redo autocompleted tags.",
+  "settings.autocomplete.fetch": "Fetch",
+  "settings.autocomplete.fetching": "Loading...",
+  "settings.autocomplete.reset_builtin": "Reset to built-in Danbooru tags",
+
+  "settings.interrogator.thresholds_desc": "Controls confidence thresholds for the image interrogator (pixai-tagger). Lower values return more tags, higher values are more selective.",
+  "settings.interrogator.more_tags": "More tags",
+  "settings.interrogator.fewer_tags": "Fewer tags",
+
+  // ── ControlNet extras ───────────────────────────────────
+  "generation.controlnet.browse_or_drop": "Browse or drop image",
+  "generation.controlnet.paste": "Paste",
+  "generation.controlnet.remove": "Remove",
+  "generation.controlnet.replace": "Replace",
+  "generation.controlnet.uploading": "Uploading...",
+  "generation.controlnet.start_percent_tip": "When ControlNet starts influencing the generation (0% = from the very beginning). Delaying the start can add more variation.",
+  "generation.controlnet.end_percent_tip": "When ControlNet stops influencing the generation (100% = until the very end). Ending early lets the model refine details freely.",
+
+  "generation.controlnet.preset_canny": "Canny Edge",
+  "generation.controlnet.preset_canny_desc": "Detects edges — best for preserving structure and composition",
+  "generation.controlnet.preset_depth": "Depth Map",
+  "generation.controlnet.preset_depth_desc": "Estimates depth — good for maintaining spatial layout",
+  "generation.controlnet.preset_openpose": "OpenPose",
+  "generation.controlnet.preset_openpose_desc": "Detects human poses — match body position and stance",
+  "generation.controlnet.preset_lineart": "LineArt",
+  "generation.controlnet.preset_lineart_desc": "Extracts clean line drawings — great for illustrations",
+  "generation.controlnet.preset_scribble": "Scribble",
+  "generation.controlnet.preset_scribble_desc": "Hand-drawn sketch guidance — turn rough drawings into art",
+  "generation.controlnet.preset_softedge": "Soft Edge",
+  "generation.controlnet.preset_softedge_desc": "Soft structural edges (HED) — natural edge preservation",
+
+  // ── Image input extras ──────────────────────────────────
+  "generation.image.drag_drop_or": "Drag & drop or",
+  "generation.image.ctrl_v_paste": "Ctrl+V Paste",
+  "generation.image.select_image": "Select Image",
+  "generation.image.drop_paste_browse": "Drag & drop, paste from clipboard, or browse to select an image",
+  "generation.image.staged_active": "Staged image active. Input image controls are disabled.",
+  "generation.image.remove_staged": "Remove Staged",
+  "generation.image.remove_mask": "Remove Mask",
+  "generation.image.select_mask": "Select Mask",
+  "generation.image.drop_paste_browse_mask": "Drag & drop, paste from clipboard, or browse to select a mask",
+
+  // ── Inpaint extras ──────────────────────────────────────
+  "generation.inpaint.inpaint_mask": "Inpaint Mask",
+  "generation.inpaint.regular_inpaint": "Regular Inpaint",
+  "generation.inpaint.canvas_off": "Canvas editor is off. Enable it to manage layers.",
+  "generation.inpaint.enable_canvas": "Enable Canvas Editor",
+
+  // ── Settings: About / Troubleshooting extras ────────────
+  "settings.about.troubleshooting": "Troubleshooting",
+  "settings.about.saved": "Saved!",
+  "settings.about.try_again": "Try again",
+  "settings.about.export_logs_desc": "Save ComfyUI logs, system info, and config to a file for sharing with support.",
+  "settings.about.data_dir_hint": "To install on a different drive, set the MOOSHIEUI_DATA_DIR environment variable to your preferred path before launching.",
+  "settings.about.save_dialog_title": "Save Diagnostic Logs",
+  "settings.paths.extra_model_placeholder": "/path/to/shared/models (e.g. from another ComfyUI or Forge install)",
 };
 
 export default en;

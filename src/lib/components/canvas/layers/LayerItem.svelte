@@ -1,5 +1,6 @@
 <script lang="ts">
   import { canvas, type CanvasLayer } from "../../../stores/canvas.svelte.js";
+  import { locale } from "../../../stores/locale.svelte.js";
 
   interface Props {
     layer: CanvasLayer;
@@ -67,7 +68,7 @@
   <button
     onclick={(e) => { e.stopPropagation(); canvas.toggleLayerVisibility(layer.id); }}
     class="shrink-0 w-5 h-5 flex items-center justify-center rounded hover:bg-neutral-700 {layer.visible ? 'text-neutral-400' : 'text-neutral-600'}"
-    title={layer.visible ? "Hide layer" : "Show layer"}
+    title={layer.visible ? locale.t('canvas.hide_layer') : locale.t('canvas.show_layer')}
   >
     <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       {#if layer.visible}
@@ -82,7 +83,7 @@
   <button
     onclick={(e) => { e.stopPropagation(); canvas.toggleLayerLock(layer.id); }}
     class="shrink-0 w-5 h-5 flex items-center justify-center rounded hover:bg-neutral-700 {layer.locked ? 'text-amber-400' : 'text-neutral-600'}"
-    title={layer.locked ? "Unlock layer" : "Lock layer"}
+    title={layer.locked ? locale.t('canvas.unlock_layer') : locale.t('canvas.lock_layer')}
   >
     <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       {#if layer.locked}

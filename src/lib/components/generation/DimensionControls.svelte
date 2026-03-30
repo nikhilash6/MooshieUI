@@ -142,7 +142,7 @@
 <div class="space-y-3">
   <!-- Aspect Ratio -->
   <div>
-    <p class="text-xs text-neutral-400 mb-1.5">{locale.t('generation.dimensions.aspect_ratio')}<InfoTip text="The shape of your image. 1:1 is square, 16:9 is widescreen, 9:16 is portrait. Pick the ratio first, then adjust resolution to control the total pixel count." /></p>
+    <p class="text-xs text-neutral-400 mb-1.5">{locale.t('generation.dimensions.aspect_ratio')}<InfoTip text={locale.t('generation.dimensions.aspect_ratio_tip')} /></p>
     <div class="flex items-center gap-1 flex-wrap mb-2">
       {#each presets as preset}
         <button
@@ -180,7 +180,7 @@
       <button
         onclick={swapAspect}
         class="text-neutral-400 hover:text-neutral-200 transition-colors shrink-0 mt-4"
-        title="Swap W/H"
+        title={locale.t('generation.dimensions.swap')}
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>
@@ -191,7 +191,7 @@
 
   <!-- Side Length -->
   <div>
-    <label class="block text-xs text-neutral-400 mb-1.5">{locale.t('generation.dimensions.resolution')}<InfoTip text="The total pixel area of your image, expressed as an equivalent square side length. 1024 = ~1 megapixel. Higher resolution = more detail but slower generation and more VRAM usage." /></label>
+    <label class="block text-xs text-neutral-400 mb-1.5">{locale.t('generation.dimensions.resolution')}<InfoTip text={locale.t('generation.dimensions.resolution_tip')} /></label>
     <input
       type="number"
       bind:value={sideLength}

@@ -27,9 +27,9 @@ After bumping, run `grep -n "X.Y.Z" package.json src-tauri/Cargo.toml src-tauri/
 
 > `Cargo.lock` updates automatically on next `cargo check`.
 
-### 2. Update RELEASE_NOTES.md
+### 2. Update RELEASE_NOTES.md and CHANGELOG.md
 
-Prepend a new section **above** the existing content:
+**RELEASE_NOTES.md** — prepend a new section **above** the existing content:
 
 ```markdown
 ## What's New in vX.Y.Z
@@ -43,7 +43,23 @@ Prepend a new section **above** the existing content:
 (existing content below)
 ```
 
-Format rules:
+**CHANGELOG.md** — prepend the same new section **below** the `# Changelog` heading and **above** the previous version:
+
+```markdown
+# Changelog
+
+## What's New in vX.Y.Z
+
+### Feature/Fix Title
+- Description
+
+---
+
+## What's New in vPREVIOUS
+(existing content below)
+```
+
+Format rules (apply to both files):
 - `## What's New in vX.Y.Z` as the top-level heading
 - `### Subsection` for each feature or fix group
 - Bullet points for details

@@ -281,7 +281,7 @@
   <div class="flex items-center justify-between">
     <label class="text-xs text-neutral-400"
       >{locale.t('generation.controlnet.title')}<InfoTip
-        text="Use a reference image to guide the generation. ControlNet can preserve edges, depth, pose, and more from a source image."
+        text={locale.t('generation.controlnet.tip')}
       /></label
     >
     <button
@@ -314,15 +314,15 @@
               <div class="w-3.5 h-3.5 shrink-0 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
               <span class="font-medium">
                 {#if installStep === "clone"}
-                  Cloning repository...
+                  {locale.t('generation.controlnet.clone_step')}
                 {:else if installStep === "pip"}
-                  Installing dependencies...
+                  {locale.t('generation.controlnet.pip_step')}
                 {:else if installStep === "restart"}
-                  Restarting ComfyUI...
+                  {locale.t('generation.controlnet.restart_step')}
                 {:else if installStep === "verify"}
-                  Verifying installation...
+                  {locale.t('generation.controlnet.verify_step')}
                 {:else}
-                  Installing...
+                  {locale.t('generation.controlnet.installing_step')}
                 {/if}
               </span>
             </div>
@@ -340,8 +340,7 @@
           </div>
         {:else}
           <p class="mb-1.5">
-            Preprocessors require <strong>comfyui_controlnet_aux</strong>. Install
-            it to enable automatic edge/depth/pose detection.
+            {locale.t('generation.controlnet.preprocessor_install')}
           </p>
           <button
             onclick={installPreprocessors}
@@ -394,10 +393,10 @@
                 : 'border-neutral-800 bg-neutral-900/30 opacity-40 cursor-not-allowed'}"
           >
             <div class="text-xs font-medium {selected ? 'text-indigo-300' : 'text-neutral-200'}">
-              {preset.label}
+              {locale.t(`generation.controlnet.preset_${preset.id}`)}
             </div>
             <div class="text-[10px] text-neutral-500 mt-0.5 leading-tight">
-              {available ? preset.description : "Not available for this model"}
+              {available ? locale.t(`generation.controlnet.preset_${preset.id}_desc`) : locale.t('generation.controlnet.not_available')}
             </div>
           </button>
         {/each}
@@ -409,7 +408,7 @@
           <div
             class="flex items-center justify-between text-[11px] text-neutral-400 mb-1"
           >
-            <span class="truncate mr-2">Downloading {downloading}...</span>
+            <span class="truncate mr-2">{locale.t('generation.controlnet.downloading', { model: downloading || '' })}</span>
             {#if dlTotal > 0}
               <span class="shrink-0 tabular-nums"
                 >{formatBytes(dlBytes)} / {formatBytes(dlTotal)} ({dlPercent}%)</span
@@ -443,15 +442,15 @@
       <!-- Custom mode -->
       <div>
         <label class="block text-xs text-neutral-400 mb-1"
-          >ControlNet Model<InfoTip
-            text="The ControlNet model file from your models/controlnet/ folder. Download models from the Model Hub or place them manually."
+          >{locale.t('generation.controlnet.controlnet_model')}<InfoTip
+            text={locale.t('generation.controlnet.model_tip')}
           /></label
         >
         <select
           bind:value={generation.controlnetModel}
           class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-100 focus:outline-none focus:border-indigo-500 transition-colors"
         >
-          <option value={null}>Select model...</option>
+          <option value={null}>{locale.t('generation.controlnet.select_model')}</option>
           {#each models.controlnetModels as model}
             <option value={model}>{model}</option>
           {/each}
@@ -471,17 +470,17 @@
           class="w-4 h-4 accent-indigo-500 rounded"
         />
         <label for="cn-use-preprocessor" class="text-xs text-neutral-400">
-          Use preprocessor
+          {locale.t('generation.controlnet.use_preprocessor')}
         </label>
       </div>
 
       {#if generation.controlnetPreprocessor !== null}
         <div>
-          <label class="block text-xs text-neutral-400 mb-1">Preprocessor</label>
+          <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.controlnet.preprocessor_label')}</label>
           <input
             type="text"
             bind:value={generation.controlnetPreprocessor}
-            placeholder="e.g. CannyEdgePreprocessor"
+            placeholder={locale.t('generation.controlnet.preprocessor_placeholder')}
             class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-100 focus:outline-none focus:border-indigo-500 transition-colors"
           />
         </div>
@@ -491,8 +490,8 @@
     <!-- Control image upload -->
     <div>
       <label class="block text-xs text-neutral-400 mb-1"
-        >Control Image<InfoTip
-          text="The reference image for ControlNet. In preset mode, this image will be processed (e.g. edge detection) before being used as guidance."
+        >{locale.t('generation.controlnet.control_image_label')}<InfoTip
+          text={locale.t('generation.controlnet.image_tip')}
         /></label
       >
       {#if generation.controlnetImage}
@@ -508,7 +507,7 @@
                 <button
                   onclick={() => { generation.controlnetImage = null; clearPreview(); }}
                   class="p-1 rounded bg-neutral-900/80 text-neutral-400 hover:text-red-400 transition-colors"
-                  title="Remove image"
+                  title={locale.t('generation.controlnet.remove')}
                 >
                   <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -524,11 +523,11 @@
                 onclick={() => { generation.controlnetImage = null; clearPreview(); }}
                 class="text-xs text-red-400 hover:text-red-300 shrink-0"
               >
-                Remove
+                {locale.t('generation.controlnet.remove')}
               </button>
             {/if}
             <label class="text-xs text-indigo-400 hover:text-indigo-300 cursor-pointer shrink-0">
-              Replace
+              {locale.t('generation.controlnet.replace')}
               <input
                 type="file"
                 accept="image/*"
@@ -548,7 +547,7 @@
           ondrop={handleImageDrop}
         >
           {#if uploadingImage}
-            <p class="text-xs text-neutral-500">Uploading...</p>
+            <p class="text-xs text-neutral-500">{locale.t('generation.controlnet.uploading')}</p>
           {:else}
             <div class="flex items-center justify-center gap-3">
               <label class="cursor-pointer text-xs text-neutral-500 hover:text-neutral-300 transition-colors">
@@ -558,7 +557,7 @@
                   onchange={handleImageUpload}
                   class="hidden"
                 />
-                Browse or drop image
+                {locale.t('generation.controlnet.browse_or_drop')}
               </label>
               <span class="text-neutral-700">|</span>
               <button
@@ -567,7 +566,7 @@
                 class="text-xs text-neutral-500 hover:text-neutral-300 transition-colors flex items-center gap-1"
               >
                 <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                Paste
+                {locale.t('generation.controlnet.paste')}
               </button>
             </div>
           {/if}
@@ -581,7 +580,7 @@
         class="flex items-center justify-between text-xs text-neutral-400 mb-1"
       >
         <span>{locale.t('generation.controlnet.strength')}<InfoTip
-          text="How strongly the ControlNet guides the generation. Higher values follow the control image more closely but may reduce creativity."
+          text={locale.t('generation.controlnet.strength_tip')}
         /></span>
         <span class="text-neutral-300"
           >{generation.controlnetStrength.toFixed(2)}</span
@@ -603,7 +602,7 @@
           class="flex items-center justify-between text-xs text-neutral-400 mb-1"
         >
           <span>{locale.t('generation.controlnet.start_percent')}<InfoTip
-            text="When ControlNet starts influencing the generation (0% = from the very beginning). Delaying the start can add more variation."
+            text={locale.t('generation.controlnet.start_percent_tip')}
           /></span>
           <span class="text-neutral-300"
             >{(generation.controlnetStartPercent * 100).toFixed(0)}%</span
@@ -623,7 +622,7 @@
           class="flex items-center justify-between text-xs text-neutral-400 mb-1"
         >
           <span>{locale.t('generation.controlnet.end_percent')}<InfoTip
-            text="When ControlNet stops influencing the generation (100% = until the very end). Ending early lets the model refine details freely."
+            text={locale.t('generation.controlnet.end_percent_tip')}
           /></span>
           <span class="text-neutral-300"
             >{(generation.controlnetEndPercent * 100).toFixed(0)}%</span

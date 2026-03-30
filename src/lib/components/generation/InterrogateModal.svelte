@@ -228,7 +228,7 @@
       {#if downloadProgress && !downloadProgress.filename.includes("done")}
         <!-- Download progress -->
         <div class="space-y-2">
-          <p class="text-sm text-neutral-300">Downloading interrogator model...</p>
+          <p class="text-sm text-neutral-300">{locale.t('generation.interrogate.downloading_model')}</p>
           <div class="h-2 bg-neutral-700 rounded-full overflow-hidden">
             <div class="h-full bg-indigo-600 rounded-full transition-all" style="width: {downloadPercent}%"></div>
           </div>
@@ -244,28 +244,28 @@
             </svg>
             <span class="text-neutral-300 text-sm">
               {#if stage === "loading_model"}
-                Loading model (first time may take a while)...
+                {locale.t('generation.interrogate.loading_model')}
               {:else if stage === "running_inference"}
-                Running inference...
+                {locale.t('generation.interrogate.running_inference')}
               {:else}
-                Preparing...
+                {locale.t('generation.interrogate.preparing')}
               {/if}
             </span>
           </div>
-          <p class="text-[10px] text-neutral-500">CPU inference can take 10-30 seconds</p>
+          <p class="text-[10px] text-neutral-500">{locale.t('generation.interrogate.cpu_hint')}</p>
         </div>
       {:else if error}
         <!-- Error state -->
         <div class="flex flex-col items-center justify-center py-12 gap-3">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
-          <p class="text-sm text-red-400">Interrogation failed</p>
+          <p class="text-sm text-red-400">{locale.t('generation.interrogate.failed')}</p>
           <p class="text-xs text-neutral-500 max-w-md text-center break-all">{error}</p>
         </div>
       {:else if result}
         <!-- Rating badge -->
         {#if ratingLabel}
           <div class="flex items-center gap-2">
-            <span class="text-xs text-neutral-400">Rating:</span>
+            <span class="text-xs text-neutral-400">{locale.t('generation.interrogate.rating')}</span>
             <span class="px-2 py-0.5 rounded-full text-xs font-medium text-white {ratingColor(ratingLabel.name)}">
               {ratingLabel.name.replace(/_/g, " ")}
             </span>
@@ -278,7 +278,7 @@
           <div>
             <button onclick={() => toggleCollapse("character")} class="flex items-center gap-1 text-sm font-medium text-indigo-400 mb-2 hover:text-indigo-300">
               <svg class="w-3 h-3 transition-transform {collapsedSections['character'] ? '-rotate-90' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
-              Characters ({result.character_tags.length})
+              {locale.t('generation.interrogate.characters', { count: result.character_tags.length })}
             </button>
             {#if !collapsedSections["character"]}
               <div class="flex flex-wrap gap-1.5">
@@ -301,7 +301,7 @@
           <div>
             <button onclick={() => toggleCollapse("artist")} class="flex items-center gap-1 text-sm font-medium text-purple-400 mb-2 hover:text-purple-300">
               <svg class="w-3 h-3 transition-transform {collapsedSections['artist'] ? '-rotate-90' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
-              Artists ({result.artist_tags.length})
+              {locale.t('generation.interrogate.artists', { count: result.artist_tags.length })}
             </button>
             {#if !collapsedSections["artist"]}
               <div class="flex flex-wrap gap-1.5">
@@ -324,7 +324,7 @@
           <div>
             <button onclick={() => toggleCollapse("general")} class="flex items-center gap-1 text-sm font-medium text-neutral-300 mb-2 hover:text-neutral-200">
               <svg class="w-3 h-3 transition-transform {collapsedSections['general'] ? '-rotate-90' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
-              General ({result.general_tags.length})
+              {locale.t('generation.interrogate.general', { count: result.general_tags.length })}
             </button>
             {#if !collapsedSections["general"]}
               <div class="flex flex-wrap gap-1.5">
@@ -347,7 +347,7 @@
           <div>
             <button onclick={() => toggleCollapse("copyright")} class="flex items-center gap-1 text-sm font-medium text-neutral-400 mb-2 hover:text-neutral-300">
               <svg class="w-3 h-3 transition-transform {collapsedSections['copyright'] ? '-rotate-90' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
-              Copyright ({result.copyright_tags.length})
+              {locale.t('generation.interrogate.copyright_label', { count: result.copyright_tags.length })}
             </button>
             {#if !collapsedSections["copyright"]}
               <div class="flex flex-wrap gap-1.5">
@@ -371,20 +371,20 @@
     {#if result && !loading}
       <div class="flex items-center justify-between px-5 py-3 border-t border-neutral-700">
         <div class="flex gap-2">
-          <button onclick={selectAll} class="text-xs text-neutral-400 hover:text-neutral-200 transition-colors">Select All</button>
+          <button onclick={selectAll} class="text-xs text-neutral-400 hover:text-neutral-200 transition-colors">{locale.t('generation.interrogate.select_all')}</button>
           <span class="text-neutral-600">|</span>
-          <button onclick={deselectAll} class="text-xs text-neutral-400 hover:text-neutral-200 transition-colors">Deselect All</button>
+          <button onclick={deselectAll} class="text-xs text-neutral-400 hover:text-neutral-200 transition-colors">{locale.t('generation.interrogate.deselect_all')}</button>
         </div>
         <div class="flex gap-2">
           <button
             onclick={handleCopy}
             class="px-3 py-1.5 text-sm rounded-lg bg-neutral-700 hover:bg-neutral-600 text-neutral-200 transition-colors"
-          >Copy</button>
+          >{locale.t('common.copy')}</button>
           <button
             onclick={handleApply}
             disabled={!anyChecked}
             class="px-3 py-1.5 text-sm rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors"
-          >Apply to Prompt</button>
+          >{locale.t('generation.interrogate.apply_to_prompt')}</button>
         </div>
       </div>
     {/if}

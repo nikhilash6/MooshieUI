@@ -1203,13 +1203,13 @@
         <div class="px-3 pb-2 pt-0.5 space-y-2">
           {#if canvas.currentStagingImage}
             <div class="rounded-md border border-amber-700/50 bg-amber-900/20 p-2 flex items-center justify-between gap-2">
-              <span class="text-[11px] text-amber-300">Staged image active. Input image controls are disabled.</span>
+              <span class="text-[11px] text-amber-300">{locale.t('generation.image.staged_active')}</span>
               <button
                 class="px-2 py-1 text-[11px] rounded border border-amber-600/60 text-amber-200 hover:border-amber-400 hover:text-amber-100 transition-colors"
                 onclick={() => canvas.dismissCurrentStaging()}
-                title="Remove staged image"
+                title={locale.t('generation.image.remove_staged')}
               >
-                Remove Staged
+                {locale.t('generation.image.remove_staged')}
               </button>
             </div>
           {/if}
@@ -1242,17 +1242,17 @@
               >
                 {#if uploading}
                   <div class="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                  <p class="text-xs text-neutral-300">Uploading...</p>
+                  <p class="text-xs text-neutral-300">{locale.t('generation.image.uploading')}</p>
                 {:else}
                   <div class="flex items-center justify-center gap-3 flex-wrap">
-                    <p class="text-[10px] text-neutral-600">Drag & drop or</p>
+                    <p class="text-[10px] text-neutral-600">{locale.t('generation.image.drag_drop_or')}</p>
                     <button
                       type="button"
                       onclick={handleImagePaste}
                       class="text-xs text-emerald-500/70 hover:text-emerald-400 transition-colors flex items-center gap-1"
                     >
                       <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                      Ctrl+V Paste
+                      {locale.t('generation.image.ctrl_v_paste')}
                     </button>
                     <span class="text-neutral-700">|</span>
                     <button
@@ -1261,10 +1261,10 @@
                       class="text-xs text-neutral-500 hover:text-neutral-300 transition-colors flex items-center gap-1"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/></svg>
-                      Select Image
+                      {locale.t('generation.image.select_image')}
                     </button>
                   </div>
-                  <p class="text-[10px] text-neutral-600 mt-2">Drag & drop, paste from clipboard, or browse to select an image</p>
+                  <p class="text-[10px] text-neutral-600 mt-2">{locale.t('generation.image.drop_paste_browse')}</p>
                 {/if}
               </div>
             {/if}
@@ -1272,7 +1272,7 @@
 
           <div>
             <label class="flex items-center justify-between text-xs text-neutral-400 mb-1">
-              <span>{locale.t('generation.image.denoise')}<InfoTip text="How much the AI changes the input image. 0 = no change, 1 = completely new image ignoring the input. Lower values (0.3-0.5) keep the original composition, higher values (0.6-0.8) allow more creative freedom." /></span>
+              <span>{locale.t('generation.image.denoise')}<InfoTip text={locale.t('generation.image.denoise_tip')} /></span>
               <EditableValue value={generation.denoise} min={0} max={1} step={0.01} decimals={2} onchange={(v) => generation.denoise = v} />
             </label>
             <input
@@ -1288,7 +1288,7 @@
           {#if generation.mode === "inpainting"}
             <div class="rounded-md border border-neutral-800 bg-neutral-900/70 p-2.5">
               <label class="flex items-center justify-between gap-3 text-xs text-neutral-300">
-                <span class="leading-tight">{locale.t('generation.inpaint.differential_diffusion')}<InfoTip text="Recommended for v-pred / Anima style models during inpainting unless you are using a CFG++ sampler. Helps preserve source structure while editing masked regions." /></span>
+                <span class="leading-tight">{locale.t('generation.inpaint.differential_diffusion')}<InfoTip text={locale.t('generation.inpaint.differential_tip')} /></span>
                 <input
                   type="checkbox"
                   bind:checked={generation.differentialDiffusion}
@@ -1305,9 +1305,9 @@
                 <button
                   class="px-2 py-1 text-[10px] rounded border border-neutral-700 text-neutral-300 hover:border-red-500 hover:text-red-300 transition-colors"
                   onclick={clearMask}
-                  title="Remove current mask"
+                  title={locale.t('generation.image.remove_mask')}
                 >
-                  Remove Mask
+                  {locale.t('generation.image.remove_mask')}
                 </button>
               </div>
               {#if maskPreviewUrl}
@@ -1336,17 +1336,17 @@
                 >
                   {#if uploading}
                     <div class="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                    <p class="text-xs text-neutral-300">Uploading...</p>
+                    <p class="text-xs text-neutral-300">{locale.t('generation.image.uploading')}</p>
                   {:else}
                     <div class="flex items-center justify-center gap-3 flex-wrap">
-                      <p class="text-[10px] text-neutral-600">Drag & drop or</p>
+                      <p class="text-[10px] text-neutral-600">{locale.t('generation.image.drag_drop_or')}</p>
                       <button
                         type="button"
                         onclick={handleMaskPaste}
                         class="text-xs text-emerald-500/70 hover:text-emerald-400 transition-colors flex items-center gap-1"
                       >
                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                        Ctrl+V Paste
+                        {locale.t('generation.image.ctrl_v_paste')}
                       </button>
                       <span class="text-neutral-700">|</span>
                       <button
@@ -1355,10 +1355,10 @@
                         class="text-xs text-neutral-500 hover:text-neutral-300 transition-colors flex items-center gap-1"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        Select Mask
+                        {locale.t('generation.image.select_mask')}
                       </button>
                     </div>
-                    <p class="text-[10px] text-neutral-600 mt-2">Drag & drop, paste from clipboard, or browse to select a mask</p>
+                    <p class="text-[10px] text-neutral-600 mt-2">{locale.t('generation.image.drop_paste_browse_mask')}</p>
                   {/if}
                 </div>
               {/if}
@@ -1366,7 +1366,7 @@
 
             <div>
               <div class="flex items-center justify-between text-xs mb-0.5">
-                <span class="text-neutral-400">{locale.t('generation.inpaint.grow_mask')}<InfoTip text="Expands the masked area by this many pixels. Helps blend the inpainted region into the surrounding image for seamless results." /></span>
+                <span class="text-neutral-400">{locale.t('generation.inpaint.grow_mask')}<InfoTip text={locale.t('generation.inpaint.grow_mask_tip')} /></span>
                 <span class="text-neutral-300 tabular-nums">{generation.growMaskBy}px</span>
               </div>
               <input
@@ -1405,18 +1405,18 @@
               class="px-2 py-1 text-[10px] rounded border transition-colors {canvas.inpaintDrawMode === 'mask'
                 ? 'border-indigo-500 text-indigo-300 bg-indigo-500/10'
                 : 'border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-neutral-200'}"
-              title="Inpaint Mask Mode"
+              title={locale.t('generation.inpaint.inpaint_mask')}
             >
-              Inpaint Mask
+              {locale.t('generation.inpaint.inpaint_mask')}
             </button>
             <button
               onclick={() => canvas.setInpaintDrawMode("regular")}
               class="px-2 py-1 text-[10px] rounded border transition-colors {canvas.inpaintDrawMode === 'regular'
                 ? 'border-indigo-500 text-indigo-300 bg-indigo-500/10'
                 : 'border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-neutral-200'}"
-              title="Regular Inpaint Mode"
+              title={locale.t('generation.inpaint.regular_inpaint')}
             >
-              Regular Inpaint
+              {locale.t('generation.inpaint.regular_inpaint')}
             </button>
           </div>
 
@@ -1424,7 +1424,7 @@
             <LayerPanel />
           {:else}
             <div class="space-y-2">
-              <p class="text-[11px] text-neutral-500">Canvas editor is off. Enable it to manage layers.</p>
+              <p class="text-[11px] text-neutral-500">{locale.t('generation.inpaint.canvas_off')}</p>
               <button
                 onclick={() => {
                   canvas.isCanvasMode = true;
@@ -1433,9 +1433,9 @@
                   }
                 }}
                 class="w-full px-2 py-1.5 text-[11px] rounded border border-neutral-700 text-neutral-300 hover:border-indigo-500 hover:text-indigo-300 transition-colors"
-                title="Enable canvas editor"
+                title={locale.t('generation.inpaint.enable_canvas')}
               >
-                Enable Canvas Editor
+                {locale.t('generation.inpaint.enable_canvas')}
               </button>
             </div>
           {/if}

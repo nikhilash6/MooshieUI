@@ -239,7 +239,7 @@
 <div class="space-y-2">
   {#if generation.stylePresetsEnabled}
     <div>
-      <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.prompts.style_preset')}<InfoTip text="Fooocus-style presets that automatically inject prompt modifiers. Great for fast starts: pick a style first, then write your subject prompt." /></label>
+      <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.prompts.style_preset')}<InfoTip text={locale.t('generation.prompts.style_preset_tip')} /></label>
       <select
         bind:value={generation.stylePreset}
         class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-100 focus:outline-none focus:border-indigo-500 transition-colors"
@@ -259,7 +259,7 @@
       <span class="flex items-center gap-1.5">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
         {locale.t('generation.interrogate.title')}
-        <InfoTip text="Analyze an image to extract tags (character, artist, general). Drop an image, browse your files, or paste from clipboard. Tags can be applied directly to your prompt." />
+        <InfoTip text={locale.t('generation.interrogate.tip')} />
       </span>
       <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 transition-transform {interrogateOpen ? '' : '-rotate-90'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
@@ -299,10 +299,10 @@
             class="text-xs text-neutral-500 hover:text-neutral-300 transition-colors flex items-center gap-1"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/></svg>
-            Select Image
+            {locale.t('generation.interrogate.select_image')}
           </button>
         </div>
-        <p class="text-[10px] text-neutral-600 mt-2">Drag & drop, paste from clipboard, or browse to select an image</p>
+        <p class="text-[10px] text-neutral-600 mt-2">{locale.t('generation.interrogate.drop_hint')}</p>
       </div>
     {/if}
   </div>
@@ -310,14 +310,14 @@
   <div>
     <div class="flex items-center justify-between mb-1">
       <div class="flex items-center gap-1.5">
-        <label class="text-xs text-neutral-400">{locale.t('generation.prompts.positive')}<InfoTip text="Describe what you want to see in the image. Use commas to separate concepts. More specific prompts give better results - include style, subject, lighting, and quality tags." /></label>
+        <label class="text-xs text-neutral-400">{locale.t('generation.prompts.positive')}<InfoTip text={locale.t('generation.prompts.positive_tip')} /></label>
       </div>
       {#if generation.isAnima || generation.isIllustrious}
-        <span class="shrink-0 text-[10px] px-2 py-0.5 rounded-full bg-emerald-600/20 text-emerald-400 border border-emerald-600/30">Quality prompts applied</span>
+        <span class="shrink-0 text-[10px] px-2 py-0.5 rounded-full bg-emerald-600/20 text-emerald-400 border border-emerald-600/30">{locale.t('generation.prompts.quality_applied')}</span>
       {/if}
     </div>
     {#if generation.isAnima}
-      <div class="text-[10px] text-amber-400/80 mb-1">Tip: Start artist tags with @ (e.g. @artist_name)</div>
+      <div class="text-[10px] text-amber-400/80 mb-1">{locale.t('generation.prompts.anima_artist_tip')}</div>
     {/if}
     <PromptTextarea
       bind:value={generation.positivePrompt}
@@ -328,7 +328,7 @@
   </div>
 
   <div>
-    <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.prompts.negative')}<InfoTip text="Describe what you don't want in the image. Common negatives include 'lowres', 'bad anatomy', 'blurry', 'worst quality'. Helps steer the AI away from common artifacts." /></label>
+    <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.prompts.negative')}<InfoTip text={locale.t('generation.prompts.negative_tip')} /></label>
     <PromptTextarea
       bind:value={generation.negativePrompt}
       placeholder="blurry, cropped, extra fingers, ..."
@@ -345,7 +345,7 @@
           onclick={() => (historySectionOpen = !historySectionOpen)}
           title={historySectionOpen ? "Collapse Prompt History & Favorites" : "Expand Prompt History & Favorites"}
         >
-          <span>{locale.t('generation.prompts.history')}<InfoTip text="Recent prompts are auto-saved when you generate. Click to reload, star favorites to pin them to the top." /></span>
+          <span>{locale.t('generation.prompts.history')}<InfoTip text={locale.t('generation.prompts.history_tip')} /></span>
           <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 transition-transform {historySectionOpen ? '' : '-rotate-90'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
       </div>
@@ -358,9 +358,9 @@
                 onclick={() => generation.applyPromptHistoryEntry(entry.id)}
                 title="Load prompt"
               >
-                <p class="text-[11px] text-neutral-200 max-h-8 overflow-hidden">{entry.positivePrompt || "(empty positive prompt)"}</p>
+                <p class="text-[11px] text-neutral-200 max-h-8 overflow-hidden">{entry.positivePrompt || locale.t('bottom_panel.empty_prompt')}</p>
                 {#if entry.negativePrompt}
-                  <p class="text-[10px] text-neutral-500 mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">Negative: {entry.negativePrompt}</p>
+                  <p class="text-[10px] text-neutral-500 mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">{locale.t('bottom_panel.neg_prefix')} {entry.negativePrompt}</p>
                 {/if}
               </button>
               <div class="mt-1.5 flex items-center justify-between gap-2">
@@ -369,16 +369,16 @@
                   <button
                     class="px-1.5 py-0.5 text-[10px] rounded border transition-colors {entry.favorite ? 'border-amber-500 text-amber-300 bg-amber-500/10' : 'border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-neutral-300'}"
                     onclick={() => generation.togglePromptFavorite(entry.id)}
-                    title={entry.favorite ? "Unfavorite" : "Favorite"}
+                    title={entry.favorite ? locale.t('bottom_panel.unfavorite') : locale.t('bottom_panel.favorite')}
                   >
                     ★
                   </button>
                   <button
                     class="px-1.5 py-0.5 text-[10px] rounded border border-neutral-700 text-neutral-400 hover:border-red-500 hover:text-red-300 transition-colors"
                     onclick={() => generation.removePromptHistoryEntry(entry.id)}
-                    title="Remove"
+                    title={locale.t('common.remove')}
                   >
-                    Remove
+                    {locale.t('common.remove')}
                   </button>
                 </div>
               </div>

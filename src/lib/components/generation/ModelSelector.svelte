@@ -321,7 +321,7 @@
   }
 
   function displayLoraName(fullPath: string): string {
-    if (!fullPath) return "Select LoRA...";
+    if (!fullPath) return locale.t('generation.model.select_lora');
     const parts = fullPath.replace(/\\/g, "/").split("/");
     return parts[parts.length - 1];
   }
@@ -432,16 +432,16 @@
     if (rec.splitModel) {
       const sm = rec.splitModel;
       if (!isModelFileInstalled(sm.diffusionModel, modelListForCategory(sm.diffusionModel.category)))
-        missingFiles.push({ file: sm.diffusionModel, label: "Downloading diffusion model..." });
+        missingFiles.push({ file: sm.diffusionModel, label: locale.t('generation.model.downloading_diffusion') });
       if (!isModelFileInstalled(sm.clipModel, modelListForCategory(sm.clipModel.category)))
-        missingFiles.push({ file: sm.clipModel, label: "Downloading text encoder..." });
+        missingFiles.push({ file: sm.clipModel, label: locale.t('generation.model.downloading_text_encoder') });
       if (!isModelFileInstalled(sm.vaeModel, modelListForCategory(sm.vaeModel.category)))
-        missingFiles.push({ file: sm.vaeModel, label: "Downloading VAE..." });
+        missingFiles.push({ file: sm.vaeModel, label: locale.t('generation.model.downloading_vae') });
     } else if (rec.checkpoint) {
       if (!isModelFileInstalled(rec.checkpoint, modelListForCategory(rec.checkpoint.category)))
-        missingFiles.push({ file: rec.checkpoint, label: "Downloading checkpoint..." });
+        missingFiles.push({ file: rec.checkpoint, label: locale.t('generation.model.downloading_checkpoint') });
       if (rec.vaeModel && !isModelFileInstalled(rec.vaeModel, modelListForCategory(rec.vaeModel.category)))
-        missingFiles.push({ file: rec.vaeModel, label: "Downloading VAE..." });
+        missingFiles.push({ file: rec.vaeModel, label: locale.t('generation.model.downloading_vae') });
     }
 
     if (missingFiles.length > 0) {
@@ -517,14 +517,14 @@
       return generation.checkpoint === expected || generation.checkpoint === resolved;
     });
     if (recMatch) return recMatch.label;
-    return generation.checkpoint || "Select checkpoint...";
+    return generation.checkpoint || locale.t('generation.model.select_checkpoint');
   });
 </script>
 
 <div class="space-y-3">
   <!-- Checkpoint -->
   <div class="relative">
-    <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.model.checkpoint')}<InfoTip text="The AI model that generates your images. Different checkpoints are trained on different styles - anime, photorealism, illustration, etc." /></label>
+    <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.model.checkpoint')}<InfoTip text={locale.t('generation.model.checkpoint_tip')} /></label>
     <button
       class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-left text-neutral-100 hover:border-neutral-600 focus:outline-none focus:border-indigo-500 transition-colors truncate flex items-center gap-2"
       onclick={() => (showCheckpointDropdown = !showCheckpointDropdown)}
@@ -535,7 +535,7 @@
     {#if downloading}
       <div class="mt-2 bg-neutral-800/80 rounded-lg px-3 py-2">
         <div class="flex items-center justify-between text-[11px] text-neutral-400 mb-1">
-          <span class="truncate mr-2">{downloadProgress || `Downloading ${downloading}...`}</span>
+          <span class="truncate mr-2">{downloadProgress || locale.t('generation.model.downloading_checkpoint')}</span>
           {#if dlTotal > 0}
             <span class="shrink-0 tabular-nums">{formatBytes(dlBytes)} / {formatBytes(dlTotal)} ({dlPercent}%)</span>
           {/if}
@@ -561,7 +561,7 @@
         <input
           type="text"
           bind:value={checkpointSearch}
-          placeholder="Search..."
+          placeholder={locale.t('generation.model.search_placeholder')}
           class="w-full bg-neutral-750 border-b border-neutral-700 px-3 py-2 text-sm text-neutral-100 placeholder-neutral-500 focus:outline-none"
         />
         <div class="overflow-y-auto max-h-48">
@@ -574,7 +574,7 @@
                 <span class="text-sm truncate">
                   {item.label}
                   {#if !item.installed}
-                    <span class="text-[10px] text-neutral-500 ml-1">(auto-download)</span>
+                    <span class="text-[10px] text-neutral-500 ml-1">({locale.t('generation.model.auto_download')})</span>
                   {/if}
                 </span>
                 {#if item.size}
@@ -596,14 +596,14 @@
 
     <!-- ModelSpec info -->
     {#if modelSpecUnavailable && !modelSpec}
-      <div class="mt-1.5 text-[11px] text-neutral-600">No ModelSpec metadata</div>
+      <div class="mt-1.5 text-[11px] text-neutral-600">{locale.t('generation.model.no_modelspec')}</div>
     {:else if modelSpec}
       <button
         class="mt-1.5 w-full flex items-center gap-1.5 text-[11px] text-indigo-400 hover:text-indigo-300 transition-colors"
         onclick={() => (showModelInfo = !showModelInfo)}
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
-        {showModelInfo ? "Hide" : "Show"} model info
+        {showModelInfo ? locale.t('generation.model.hide_model_info') : locale.t('generation.model.show_model_info')}
         {#if modelSpec.title}
           <span class="text-neutral-500 truncate">— {modelSpec.title}</span>
         {/if}
@@ -680,12 +680,12 @@
 
   <!-- VAE -->
   <div>
-    <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.model.vae')}<InfoTip text="Variational Auto-Encoder - converts between pixel images and the latent space the AI works in. 'Automatic' uses the one built into your checkpoint, which is usually best." /></label>
+    <label class="block text-xs text-neutral-400 mb-1">{locale.t('generation.model.vae')}<InfoTip text={locale.t('generation.model.vae_tip')} /></label>
     <select
       bind:value={generation.vae}
       class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-100 focus:outline-none focus:border-indigo-500 transition-colors"
     >
-      <option value="">Automatic (from checkpoint)</option>
+      <option value="">{locale.t('generation.model.auto_vae')}</option>
       {#each models.vaes as vae}
         <option value={vae}>{vae}</option>
       {/each}
@@ -696,7 +696,7 @@
   <div>
     <div class="flex items-center justify-between mb-1.5">
       <div class="flex items-center gap-2">
-        <label class="text-xs text-neutral-400">LoRAs<InfoTip text="Low-Rank Adaptations - small add-on models that modify the checkpoint's style or teach it new concepts (characters, styles, objects) without replacing the whole model." /></label>
+        <label class="text-xs text-neutral-400">{locale.t('generation.model.lora_title')}<InfoTip text={locale.t('generation.model.lora_tip')} /></label>
         {#if activeLoraCount > 0}
           <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-600/20 text-indigo-400">
             {activeLoraCount} active
@@ -707,7 +707,7 @@
         onclick={() => generation.addLora()}
         class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
       >
-        + Add LoRA
+        {locale.t('generation.model.add_lora')}
       </button>
     </div>
     {#each generation.loras as lora, i}
@@ -752,7 +752,7 @@
                 <input
                   type="text"
                   bind:value={loraSearches[i]}
-                  placeholder="Search LoRAs..."
+                  placeholder={locale.t('generation.model.search_loras')}
                   class="w-full bg-neutral-750 border-b border-neutral-700 px-2 py-1.5 text-xs text-neutral-100 placeholder-neutral-500 focus:outline-none"
                 />
                 <div class="overflow-y-auto max-h-36">
@@ -783,7 +783,7 @@
           <div class="space-y-1.5">
             <div>
               <div class="flex items-center justify-between text-xs mb-0.5">
-                <span class="text-neutral-500">{locale.t('generation.model.lora_strength_model')}<InfoTip text="How strongly this LoRA affects the image generation model. Higher values = stronger effect, but too high can distort the image." /></span>
+                <span class="text-neutral-500">{locale.t('generation.model.lora_strength_model')}<InfoTip text={locale.t('generation.model.lora_strength_model_tip')} /></span>
                 <span class="text-neutral-300 tabular-nums">{lora.strength_model.toFixed(2)}</span>
               </div>
               <input
@@ -797,7 +797,7 @@
             </div>
             <div>
               <div class="flex items-center justify-between text-xs mb-0.5">
-                <span class="text-neutral-500">{locale.t('generation.model.lora_strength_clip')}<InfoTip text="How strongly this LoRA affects text understanding. Controls how much the LoRA changes what the AI 'sees' in your prompt." /></span>
+                <span class="text-neutral-500">{locale.t('generation.model.lora_strength_clip')}<InfoTip text={locale.t('generation.model.lora_strength_clip_tip')} /></span>
                 <span class="text-neutral-300 tabular-nums">{lora.strength_clip.toFixed(2)}</span>
               </div>
               <input
