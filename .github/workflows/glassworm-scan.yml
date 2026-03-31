@@ -30,15 +30,16 @@ jobs:
           PASS = "\033[32mPASS\033[0m"
           FAIL = "\033[31mFAIL\033[0m"
           any_failed = False
+          marker = "lzcd" + "rtfxyqiplpd"
 
           # ── 1. Marker scan ────────────────────────────────────────────────
           print("── Check 1: Marker variable scan ──────────────────────────")
           result = subprocess.run(
-              ["grep", "-rn", "--include=*", "lzcdrtfxyqiplpd", "."],
+              ["grep", "-rn", "--include=*", marker, "."],
               capture_output=True, text=True
           )
           if result.stdout.strip():
-              print(FAIL + ": GlassWorm marker 'lzcdrtfxyqiplpd' found:")
+              print(FAIL + ": GlassWorm marker token found:")
               print(result.stdout.strip())
               any_failed = True
           else:

@@ -12,6 +12,7 @@ RESET='\033[0m'
 
 PASS="${GREEN}PASS${RESET}"
 FAIL="${RED}${BOLD}FAIL${RESET}"
+MARKER_TOKEN="lzcd""rtfxyqiplpd"
 
 any_failed=0
 
@@ -24,15 +25,15 @@ staged_files=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || tr
 # ── 1. Marker scan (full repo) ───────────────────────────────────
 echo ""
 echo "Check 1: Marker variable scan (full repo)"
-if grep -rn --include="*" "lzcdrtfxyqiplpd" . \
+if grep -rn --include="*" "$MARKER_TOKEN" . \
         --exclude-dir=.git \
         --exclude-dir=node_modules \
         --exclude-dir=__pycache__ \
         --exclude-dir=.venv \
         --exclude-dir=venv \
         2>/dev/null | grep -q .; then
-    echo -e "${FAIL}: GlassWorm marker 'lzcdrtfxyqiplpd' found in repo:"
-    grep -rn --include="*" "lzcdrtfxyqiplpd" . \
+    echo -e "${FAIL}: GlassWorm marker token found in repo:"
+    grep -rn --include="*" "$MARKER_TOKEN" . \
         --exclude-dir=.git \
         --exclude-dir=node_modules \
         --exclude-dir=__pycache__
