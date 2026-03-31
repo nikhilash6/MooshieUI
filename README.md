@@ -346,6 +346,33 @@ See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
 ---
 
+## 🔒 Security
+
+This repository runs automated **GlassWorm resistance checks** on every push and pull request to detect a class of supply-chain attacks that use invisible Unicode variation-selector characters to embed hidden payloads in source files, combined with force-pushed commits whose author/committer timestamps have been tampered with to conceal the injection.
+
+### What is checked
+
+| Check | Scope | Details |
+|-------|-------|---------|
+| Marker variable | Full repo | Detects the known GlassWorm beacon string |
+| Unicode steganography | `.py .js .ts .svelte .rs` | Scans for codepoints U+FE00–FE0F and U+E0100–E01EF (zero-width variation selectors used to encode payloads) |
+| Git date tampering | Full history | Flags any commit where the committer timestamp is more than 1 hour ahead of the author timestamp — a sign of force-pushed history rewriting |
+| Obfuscated `eval()` | `.py .js .ts .svelte` | Detects `eval()` calls whose argument contains `decode`, `atob`, `fromCharCode`, `Buffer.from`, or `base64` — the execution pattern used by the Unicode loader |
+
+The CI workflow (`.github/workflows/glassworm-scan.yml`) runs all four checks and **blocks merges** if any check fails.
+
+### Local pre-commit hook
+
+Contributors should activate the same checks locally so issues are caught before they reach CI:
+
+```bash
+bash scripts/setup-hooks.sh
+```
+
+This sets `core.hooksPath` to `.githooks` and makes the pre-commit script executable. The hook runs automatically on every `git commit` and blocks the commit with a clear error message if anything suspicious is found.
+
+---
+
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
