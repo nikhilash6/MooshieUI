@@ -96,6 +96,9 @@
     );
     generation.width = dims.w;
     generation.height = dims.h;
+    // Mark these dimensions as already synced so the $effect doesn't
+    // re-infer the aspect ratio and overwrite the user's input.
+    lastSyncedDimensions = `${dims.w}x${dims.h}`;
   }
 
   function applyPreset(w: number, h: number) {

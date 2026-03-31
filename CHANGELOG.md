@@ -1,5 +1,22 @@
 # Changelog
 
+## What's New in v0.4.9
+
+### Bug Fix: Aspect Ratio Input
+- Fixed aspect ratio inputs in the Dimensions panel randomly changing values while typing
+- Custom ratios like `5:3` or `7:4` now stay exactly as entered instead of being overwritten by GCD-reduced equivalents
+
+### Security: GlassWorm Supply-Chain Protection
+- Added pre-commit hook and CI workflow to scan for obfuscated supply-chain attack patterns
+- New PR annotation workflow highlights suspicious Unicode or encoded payloads in pull requests
+
+### Maintenance
+- Added Dependabot configuration for automated dependency updates
+- Bumped Tailwind CSS, svelte-check, and uuid dependencies
+- Added CODEOWNERS for automatic PR review routing
+
+---
+
 ## What's New in v0.4.8
 
 ### Full Internationalization
