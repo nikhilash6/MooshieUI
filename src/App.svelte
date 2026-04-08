@@ -1,8 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { invoke } from "@tauri-apps/api/core";
-  import { listen } from "@tauri-apps/api/event";
-  import { getCurrentWindow } from "@tauri-apps/api/window";
+  import { ipcInvoke, ipcListen, isTauri, isBrowserMode, startHeartbeat, getAuthToken, setAuthToken, setAuthUser } from "./lib/utils/ipc.js";
   import SetupWizard from "./lib/components/setup/SetupWizard.svelte";
   import GenerationPage from "./lib/components/generation/GenerationPage.svelte";
   import SettingsPage from "./lib/components/settings/SettingsPage.svelte";
@@ -386,6 +384,130 @@
   let currentPage = $state<"generate" | "gallery" | "modelhub" | "settings">(
     "generate"
   );
+
+  // Auth gate state (browser mode LAN access)
+  let authRequired = $state(false);
+  let authChecked = $state(false);
+  let userRole = $state<"admin" | "moderator" | "user" | "anonymous">("admin");
+  let loginUser = $state("");
+  let loginPass = $state("");
+  let loginError = $state<string | null>(null);
+  let loginBusy = $state(false);
+  let mustChangePassword = $state(false);
+  let newPass1 = $state("");
+  let newPass2 = $state("");
+  let changePassError = $state<string | null>(null);
+  let changePassBusy = $state(false);
+
+  async function checkAuth(): Promise<boolean> {
+    if (!isBrowserMode) {
+      authChecked = true;
+      userRole = "admin";
+      return true;
+    }
+    try {
+      const resp = await fetch("/internal-api/_auth/status", {
+        headers: getAuthToken() ? { Authorization: `Bearer ${getAuthToken()}` } : {},
+      });
+      const data = await resp.json();
+      userRole = data.role ?? "anonymous";
+      if (data.role === "anonymous" && data.auth_required) {
+        authRequired = true;
+        authChecked = true;
+        return false;
+      }
+      authRequired = false;
+      authChecked = true;
+      return true;
+    } catch {
+      // Can't reach server — proceed without auth gate
+      authChecked = true;
+      return true;
+    }
+  }
+
+  async function handleLogin() {
+    loginBusy = true;
+    loginError = null;
+    try {
+      const resp = await fetch("/internal-api/_auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: loginUser, password: loginPass }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        loginError = data.error ?? "Login failed.";
+        return;
+      }
+      setAuthToken(data.token);
+      setAuthUser(loginUser.trim());
+      // Re-check auth status to get the actual role (user vs moderator)
+      const statusResp = await fetch("/internal-api/_auth/status", {
+        headers: { Authorization: `Bearer ${data.token}` },
+      });
+      const statusData = await statusResp.json();
+      userRole = statusData.role ?? "user";
+
+      // If the admin set a temporary password, force a change before proceeding
+      if (data.must_change_password) {
+        mustChangePassword = true;
+        return;
+      }
+
+      authRequired = false;
+      // Now continue the normal startup flow
+      // LAN users skip setup check — setup is only for the host.
+      // If the host hasn't finished setup yet, the server wouldn't be working anyway.
+      setupComplete = true;
+      await initApp();
+    } catch (e) {
+      loginError = String(e);
+    } finally {
+      loginBusy = false;
+    }
+  }
+
+  async function handleSetNewPassword() {
+    if (newPass1.length < 4) {
+      changePassError = "Password must be at least 4 characters.";
+      return;
+    }
+    if (newPass1 !== newPass2) {
+      changePassError = "Passwords do not match.";
+      return;
+    }
+    changePassBusy = true;
+    changePassError = null;
+    try {
+      const resp = await fetch("/internal-api/_auth/change_password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        body: JSON.stringify({ current_password: loginPass, new_password: newPass1 }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        changePassError = data.error ?? "Failed to change password.";
+        return;
+      }
+      // Password changed — proceed normally
+      mustChangePassword = false;
+      authRequired = false;
+      loginPass = "";
+      newPass1 = "";
+      newPass2 = "";
+      // LAN users skip setup check — setup is only for the host.
+      setupComplete = true;
+      await initApp();
+    } catch (e) {
+      changePassError = String(e);
+    } finally {
+      changePassBusy = false;
+    }
+  }
   let versionTapCount = $state(0);
   let startupStatus = $state<string>("");
 
@@ -1029,20 +1151,25 @@
   }
 
   onMount(async () => {
-    // Restore window maximize state
-    try {
-      const raw = localStorage.getItem(WIN_STATE_KEY);
-      if (raw) {
-        const { maximized } = JSON.parse(raw) as { maximized?: boolean };
-        if (maximized) await getCurrentWindow().maximize();
-      }
-    } catch {}
+    // Start heartbeat in browser mode to keep backend alive
+    startHeartbeat();
 
-    // Persist maximize/restore changes
-    await getCurrentWindow().onResized(async () => {
-      const maximized = await getCurrentWindow().isMaximized();
-      saveWindowMaximized(maximized);
-    });
+    // Restore window maximize state (Tauri only)
+    if (isTauri) {
+      try {
+        const { getCurrentWindow } = await import("@tauri-apps/api/window");
+        const raw = localStorage.getItem(WIN_STATE_KEY);
+        if (raw) {
+          const { maximized } = JSON.parse(raw) as { maximized?: boolean };
+          if (maximized) await getCurrentWindow().maximize();
+        }
+        // Persist maximize/restore changes
+        await getCurrentWindow().onResized(async () => {
+          const maximized = await getCurrentWindow().isMaximized();
+          saveWindowMaximized(maximized);
+        });
+      } catch {}
+    }
 
     // Apply dyslexic font if enabled
     if (localStorage.getItem("mooshieui.dyslexicFont") === "true") {
@@ -1052,9 +1179,13 @@
     loadGalleryPrefs();
     downloads.init();
 
+    // Check auth for browser mode LAN access (before any ipcInvoke calls)
+    const authOk = await checkAuth();
+    if (!authOk) return;
+
     // Check if first-run setup is needed
     try {
-      setupComplete = await invoke<boolean>("check_setup");
+      setupComplete = await ipcInvoke<boolean>("check_setup");
     } catch {
       setupComplete = false;
     }
@@ -1088,7 +1219,7 @@
 
     // Set up event listeners BEFORE starting so we don't miss events
     await Promise.all([
-      listen("comfyui:connection", (event: any) => {
+      ipcListen("comfyui:connection", (event: any) => {
         console.log("Connection event:", event.payload);
         connection.connected = event.payload.connected;
         if (event.payload.connected) {
@@ -1098,7 +1229,7 @@
           });
         }
       }),
-      listen("comfyui:server_ready", async () => {
+      ipcListen("comfyui:server_ready", async () => {
         console.log("Server ready event received");
         startupStatus = "";
         // Load models now that server is up
@@ -1113,11 +1244,11 @@
           console.error("Model refresh failed after server ready:", e);
         }
       }),
-      listen("comfyui:server_error", (event: any) => {
+      ipcListen("comfyui:server_error", (event: any) => {
         console.error("Server error:", event.payload);
         startupStatus = `Failed to start: ${event.payload?.error || "unknown error"}`;
       }),
-      listen("comfyui:progress", (event: any) => {
+      ipcListen("comfyui:progress", (event: any) => {
         const data = event.payload;
         if (!progress.isGenerating) return;
         lastProgressEventAt = Date.now();
@@ -1129,12 +1260,12 @@
         const node = data.node ?? progress.currentNode;
         progress.updateProgress(data.value, data.max, node);
       }),
-      listen("comfyui:preview", (event: any) => {
+      ipcListen("comfyui:preview", (event: any) => {
         const data = event.payload;
         if (!progress.isGenerating) return;
         progress.previewImage = `data:image/${data.format};base64,${data.image}`;
       }),
-      listen("comfyui:output_image", (event: any) => {
+      ipcListen("comfyui:output_image", (event: any) => {
         // MooshieSaveImage sends final PNG bytes over WS — collect per prompt
         const data = event.payload;
         if (!progress.isGenerating) return;
@@ -1169,7 +1300,7 @@
         arr.push({ blob, url });
         pendingOutputImages.set(pid, arr);
       }),
-      listen("comfyui:executing", (event: any) => {
+      ipcListen("comfyui:executing", (event: any) => {
         const data = event.payload;
         console.log("Executing event:", data);
         // Ignore prompts not in our queue
@@ -1201,7 +1332,7 @@
           progress.currentNode = data.node;
         }
       }),
-      listen("comfyui:execution_error", (event: any) => {
+      ipcListen("comfyui:execution_error", (event: any) => {
         console.error("Execution error:", event.payload);
         const data = event.payload;
         if (data.prompt_id) {
@@ -1215,7 +1346,7 @@
           compare.clearGridBatch();
         }
       }),
-      listen("comfyui:execution_success", (_event: any) => {
+      ipcListen("comfyui:execution_success", (_event: any) => {
         // Success handled via executing node=null
       }),
     ]);
@@ -1225,12 +1356,25 @@
     if (autoStartEnabled) {
       try {
         console.log("Starting ComfyUI...");
-        const result = await invoke<string>("start_comfyui");
+        const result = await ipcInvoke<string>("start_comfyui");
         console.log("start_comfyui returned:", result);
         if (result === "spawned") {
           startupStatus = "Starting ComfyUI...";
         } else if (result === "already_running") {
+          // SSE EventSource may not be connected yet, so the broadcast
+          // comfyui:server_ready event could be lost. Handle it directly.
           startupStatus = "Connecting...";
+          try {
+            await models.refresh();
+            console.log("Models loaded (already running):", models.checkpoints);
+            if (models.checkpoints.length > 0) {
+              connection.connected = true;
+              generation.applyDefaultsIfNeeded(models.checkpoints, models.vaes);
+            }
+            startupStatus = "";
+          } catch (e) {
+            console.error("Model refresh failed (already running):", e);
+          }
         }
       } catch (e) {
         console.error("Failed to start ComfyUI:", e);
@@ -1291,7 +1435,80 @@
   });
 </script>
 
-{#if setupComplete === null}
+{#if authRequired}
+  {#if mustChangePassword}
+    <!-- Forced password change screen -->
+    <div class="flex items-center justify-center h-full bg-neutral-950">
+      <div class="w-80 space-y-4">
+        <div class="flex items-center justify-center gap-3 mb-6">
+          <img src={logoUrl} alt="MooshieUI" class="w-10 h-10 rounded-lg" />
+          <h1 class="text-xl font-bold text-neutral-100">MooshieUI</h1>
+        </div>
+        <p class="text-sm text-neutral-400 text-center">Your password has been reset by an admin. Please choose a new password.</p>
+        <input
+          type="password"
+          bind:value={newPass1}
+          placeholder="New password (4+ characters)"
+          class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-indigo-500 transition-colors"
+          onkeydown={(e) => { if (e.key === "Enter") document.getElementById("confirm-pass")?.focus(); }}
+        />
+        <input
+          id="confirm-pass"
+          type="password"
+          bind:value={newPass2}
+          placeholder="Confirm new password"
+          class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-indigo-500 transition-colors"
+          onkeydown={(e) => { if (e.key === "Enter") handleSetNewPassword(); }}
+        />
+        {#if changePassError}
+          <p class="text-xs text-red-400">{changePassError}</p>
+        {/if}
+        <button
+          class="w-full py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {changePassBusy ? 'bg-neutral-700 text-neutral-500' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}"
+          disabled={changePassBusy}
+          onclick={handleSetNewPassword}
+        >
+          {changePassBusy ? "Saving..." : "Set New Password"}
+        </button>
+      </div>
+    </div>
+  {:else}
+  <!-- Login gate for LAN users -->
+  <div class="flex items-center justify-center h-full bg-neutral-950">
+    <div class="w-80 space-y-4">
+      <div class="flex items-center justify-center gap-3 mb-6">
+        <img src={logoUrl} alt="MooshieUI" class="w-10 h-10 rounded-lg" />
+        <h1 class="text-xl font-bold text-neutral-100">MooshieUI</h1>
+      </div>
+      <p class="text-sm text-neutral-400 text-center">Sign in to continue</p>
+      <input
+        type="text"
+        bind:value={loginUser}
+        placeholder="Username"
+        class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-indigo-500 transition-colors"
+        onkeydown={(e) => { if (e.key === "Enter") handleLogin(); }}
+      />
+      <input
+        type="password"
+        bind:value={loginPass}
+        placeholder="Password"
+        class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-indigo-500 transition-colors"
+        onkeydown={(e) => { if (e.key === "Enter") handleLogin(); }}
+      />
+      {#if loginError}
+        <p class="text-xs text-red-400">{loginError}</p>
+      {/if}
+      <button
+        class="w-full py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {loginBusy ? 'bg-neutral-700 text-neutral-500' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}"
+        disabled={loginBusy}
+        onclick={handleLogin}
+      >
+        {loginBusy ? "Signing in..." : "Sign In"}
+      </button>
+    </div>
+  </div>
+  {/if}
+{:else if setupComplete === null}
   <!-- Loading state -->
   <div class="flex items-center justify-center h-full bg-neutral-950">
     <div
@@ -1464,7 +1681,7 @@
             onclick={async () => {
               try {
                 startupStatus = "Starting ComfyUI...";
-                const result = await invoke<string>("start_comfyui");
+                const result = await ipcInvoke<string>("start_comfyui");
                 if (result === "spawned") startupStatus = "Starting ComfyUI...";
                 else if (result === "already_running") startupStatus = "Connecting...";
               } catch (e) {
@@ -1699,7 +1916,7 @@
     {:else if currentPage === "modelhub"}
       <ModelHubPage />
     {:else if currentPage === "settings"}
-      <SettingsPage />
+      <SettingsPage {userRole} />
     {/if}
     </div>
   </main>

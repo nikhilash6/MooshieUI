@@ -1,3 +1,4 @@
+pub mod auth;
 pub mod comfyui;
 pub mod commands;
 pub mod config;
@@ -7,6 +8,9 @@ pub mod metadata;
 pub mod setup;
 pub mod state;
 pub mod templates;
+pub mod webserver;
+
+use std::sync::Arc;
 
 use config::load_persisted_config;
 use state::AppState;
@@ -91,7 +95,11 @@ pub fn run() {
     }
 
     let config = load_persisted_config();
-    let app_state = AppState::new(config);
+    let browser_mode = config.browser_mode;
+    let ui_server_port = config.ui_server_port;
+    let lan_enabled = config.lan_enabled;
+
+    let app_state = Arc::new(AppState::new(config));
 
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::default().build())
@@ -102,23 +110,63 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .manage(app_state)
-        .setup(|_app| {
-            #[cfg(target_os = "linux")]
+        .setup(move |_app| {
+            // Store the AppHandle so the web server can show/hide the window later.
             {
+                let shared_state: Arc<AppState> = _app.state::<Arc<AppState>>().inner().clone();
+                let handle = _app.handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    *shared_state.app_handle.lock().await = Some(handle);
+                });
+            }
+
+            // In browser mode: hide the window, start web server, open browser
+            if browser_mode {
                 use tauri::Manager;
                 if let Some(main_window) = _app.get_webview_window("main") {
-                    let _ = main_window.with_webview(|webview| {
-                        use webkit2gtk::WebViewExt;
-                        if let Some(settings) = webview.inner().settings() {
-                            use webkit2gtk::SettingsExt;
-                            settings.set_enable_smooth_scrolling(true);
-                            settings.set_enable_page_cache(true);
-                            settings.set_hardware_acceleration_policy(
-                                webkit2gtk::HardwareAccelerationPolicy::Always,
-                            );
-                            settings.set_enable_developer_extras(true);
-                        }
+                    let _ = main_window.hide();
+                }
+
+                // Share the same AppState between Tauri and the web server
+                let shared_state: Arc<AppState> = _app.state::<Arc<AppState>>().inner().clone();
+
+                let state_for_server = shared_state.clone();
+                tauri::async_runtime::spawn(async move {
+                    webserver::start_server(state_for_server, ui_server_port, lan_enabled).await;
+                });
+                // Only start heartbeat watchdog in single-user browser mode.
+                // With LAN access enabled, multiple users may connect and we
+                // must NOT shut down when one browser tab closes.
+                if !lan_enabled {
+                    let state_for_watchdog = shared_state.clone();
+                    tauri::async_runtime::spawn(async move {
+                        webserver::start_heartbeat_watchdog(state_for_watchdog, 10);
                     });
+                }
+
+                // Open the default browser
+                let url = format!("http://127.0.0.1:{}", ui_server_port);
+                log::info!("Opening browser at {}", url);
+                let _ = open::that(&url);
+            } else {
+                // Normal app mode — configure WebView
+                #[cfg(target_os = "linux")]
+                {
+                    use tauri::Manager;
+                    if let Some(main_window) = _app.get_webview_window("main") {
+                        let _ = main_window.with_webview(|webview| {
+                            use webkit2gtk::WebViewExt;
+                            if let Some(settings) = webview.inner().settings() {
+                                use webkit2gtk::SettingsExt;
+                                settings.set_enable_smooth_scrolling(true);
+                                settings.set_enable_page_cache(true);
+                                settings.set_hardware_acceleration_policy(
+                                    webkit2gtk::HardwareAccelerationPolicy::Always,
+                                );
+                                settings.set_enable_developer_extras(true);
+                            }
+                        });
+                    }
                 }
             }
             Ok(())
@@ -238,6 +286,7 @@ pub fn run() {
             commands::config::update_config,
             commands::config::get_gallery_path,
             commands::config::set_gallery_path,
+            commands::config::switch_to_browser_mode,
             commands::interrogator::interrogate_image,
             commands::interrogator::interrogate_image_path,
             commands::interrogator::interrogate_gallery_image,
@@ -258,7 +307,7 @@ pub fn run() {
 
     app.run(|app_handle, event| {
         if let RunEvent::ExitRequested { .. } = event {
-            let state = app_handle.state::<AppState>();
+            let state = app_handle.state::<Arc<AppState>>();
             let keep_alive = {
                 let config = state.config.blocking_read();
                 config.keep_alive
