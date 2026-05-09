@@ -1409,6 +1409,16 @@ pub async fn install_pip_package(
     Ok(())
 }
 
+/// Reject category/filename inputs containing path-traversal components.
+/// Returns true if the input is safe to join into a model path.
+fn is_safe_path_component(s: &str) -> bool {
+    !s.is_empty()
+        && !s.contains("..")
+        && !s.contains('/')
+        && !s.contains('\\')
+        && !s.starts_with('.')
+}
+
 /// Search for a model file by SHA256 hash (full or AutoV2) within a model category directory.
 /// Returns the filename if found, or null if no match.
 /// Note: this hashes each file in the directory, so it may take a while for large collections.
@@ -1419,43 +1429,64 @@ pub async fn find_model_by_hash(
     category: String,
     hash: String,
 ) -> Result<Option<String>, AppError> {
+    // Reject path-traversal attempts on the user-supplied category.
+    if !is_safe_path_component(&category) {
+        return Ok(None);
+    }
+
     let config = state.config.read().await;
     if config.comfyui_path.is_empty() {
         return Ok(None);
     }
-    let models_dir = std::path::Path::new(&config.comfyui_path)
-        .join("models")
-        .join(&category);
 
-    if !models_dir.exists() {
-        return Ok(None);
-    }
+    // Text encoders historically live under either `text_encoders/` (modern
+    // split-file layout) or `clip/` (legacy ComfyUI / Forge layout). Search
+    // both when looking up text encoder hashes so a model placed in `clip/`
+    // still resolves.
+    let categories: Vec<&str> = match category.as_str() {
+        "text_encoders" => vec!["text_encoders", "clip"],
+        "clip" => vec!["clip", "text_encoders"],
+        other => vec![other],
+    };
 
     let needle = hash.to_uppercase();
     let is_autov2 = needle.len() == 10;
 
-    let entries = std::fs::read_dir(&models_dir)?;
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if !path.is_file() {
+    for cat in categories {
+        let models_dir = std::path::Path::new(&config.comfyui_path)
+            .join("models")
+            .join(cat);
+
+        if !models_dir.exists() {
             continue;
         }
-        let name = path
-            .file_name()
-            .unwrap_or_default()
-            .to_string_lossy()
-            .to_string();
-        if !(name.ends_with(".safetensors") || name.ends_with(".ckpt")) {
-            continue;
-        }
-        if let Ok(h) = full_sha256(&path) {
-            let matches = if is_autov2 {
-                autov2_hash(&h) == needle
-            } else {
-                h == needle
-            };
-            if matches {
-                return Ok(Some(name));
+
+        let entries = match std::fs::read_dir(&models_dir) {
+            Ok(e) => e,
+            Err(_) => continue,
+        };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if !path.is_file() {
+                continue;
+            }
+            let name = path
+                .file_name()
+                .unwrap_or_default()
+                .to_string_lossy()
+                .to_string();
+            if !(name.ends_with(".safetensors") || name.ends_with(".ckpt")) {
+                continue;
+            }
+            if let Ok(h) = full_sha256(&path) {
+                let matches = if is_autov2 {
+                    autov2_hash(&h) == needle
+                } else {
+                    h == needle
+                };
+                if matches {
+                    return Ok(Some(name));
+                }
             }
         }
     }
@@ -1471,6 +1502,11 @@ pub async fn hash_model_file(
     category: String,
     filename: String,
 ) -> Result<ModelHashResult, AppError> {
+    // Reject path-traversal attempts on user-supplied inputs.
+    if !is_safe_path_component(&category) || !is_safe_path_component(&filename) {
+        return Err(AppError::Other("Invalid category or filename".into()));
+    }
+
     let config = state.config.read().await;
     if config.comfyui_path.is_empty() {
         return Err(AppError::Other("ComfyUI path not configured".into()));
@@ -1479,6 +1515,30 @@ pub async fn hash_model_file(
         .join("models")
         .join(&category)
         .join(&filename);
+
+    // Fall back to the alternate directory for text encoders (clip ↔ text_encoders).
+    let path = if !path.exists() {
+        let alt = match category.as_str() {
+            "text_encoders" => Some("clip"),
+            "clip" => Some("text_encoders"),
+            _ => None,
+        };
+        if let Some(alt) = alt {
+            let alt_path = std::path::Path::new(&config.comfyui_path)
+                .join("models")
+                .join(alt)
+                .join(&filename);
+            if alt_path.exists() {
+                alt_path
+            } else {
+                path
+            }
+        } else {
+            path
+        }
+    } else {
+        path
+    };
 
     if !path.exists() {
         return Err(AppError::Other(format!("File not found: {}", filename)));
