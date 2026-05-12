@@ -1,5 +1,15 @@
 # Changelog
 
+## What's New in v1.1.11
+
+### Prompt Presets
+- **Ordered wildcard presets** — prompt preset wildcards can now cycle through their lines in document order, wrapping back to the first entry after the last option. This makes it much easier to test every wildcard entry without manually selecting each one.
+
+### Startup Reliability
+- **Missing MooshieUI custom nodes are caught before generation** — MooshieUI now verifies every vital bundled node class (`MooshieSaveImage`, `MooshieFaceDetailer`, `MooshieSoftGuidance`, `MooshieSmartGuidance`, `NanoSaurLoader`, and `ApplyTiledDiffusion`) before treating an existing, newly spawned, worker, or reachable remote ComfyUI server as ready. If ComfyUI was already running and has not loaded the updated nodes, startup now shows a clear restart/install message instead of letting generations fail later with a missing-node error.
+
+---
+
 ## What's New in v1.1.10
 
 ### Docker ControlNet Startup Fix
