@@ -1,95 +1,104 @@
 # Changelog
 
+## What's New in v1.2.5
+
+### Prompt Preset Wildcards
+- **Inline ordered wildcards are now stable per generation**: prompt presets used inline keep a fixed wildcard choice for the whole prompt, so repeated references resolve consistently during ordered runs.
+- **Active preset injection avoids inline duplicates**: active presets are skipped when the same preset is already referenced inline, preventing doubled prompt text during generation.
+
+### Generation Cancellation
+- **Ordered wildcard batches can be cancelled cleanly**: generated prompt IDs are tracked through the run, allowing cancellation to delete queued prompts and interrupt only the active prompt instead of affecting unrelated work.
+
+### Export Reliability
+- **Prompt preset and style text exports use the backend writer**: `.txt` exports now save through MooshieUI's Tauri file-write command after the save dialog returns a path, fixing exports that failed in desktop mode.
+
+### Browser Mode Startup
+- **First-run Web Browser Mode opens immediately**: choosing Web Browser Mode during setup now starts the embedded web UI and opens the browser right away instead of continuing in the desktop window until the next launch.
+- **Browser launch failures keep the app visible**: if the system default browser cannot be opened, MooshieUI restores App Mode and reports the error rather than hiding the window.
+- **Diagnostics show the UI mode**: exported logs now include whether MooshieUI is running in App Mode or Browser Mode, separate from the ComfyUI server mode.
+
+---
+
 ## What's New in v1.2.4
 
-### JXL Image Save Fix (Browser/Server Mode)
-- Fixed a **500 error** when saving a JXL-format generation from the preview menu in browser/server mode. The server was asked to transcode the raw `.jxl` temp file on-the-fly, which it cannot do. MooshieUI now uses the pre-built WebP display copy (already served for preview) for the save operation, eliminating the error entirely.
-
-### JXL Clipboard Copy — Metadata Now Included
-- Copying a JXL session image to the clipboard now correctly re-embeds generation metadata (prompt, sampler, seed, etc.) into the PNG. Previously the clipboard copy went through a canvas round-trip that stripped all metadata; it now falls back gracefully to the pre-built display copy with full metadata intact when the gallery transcoder is unavailable.
+### JXL Image Saves
+- **Browser-mode JXL gallery saves no longer fail with a 500**: server-mode saves now use the pre-built WebP display copy instead of forcing an on-demand transcode path.
+- **JXL clipboard copies keep metadata**: copying generated JXL output now re-embeds prompt, sampler, seed, and other generation metadata into the PNG clipboard image.
 
 ### Dependency Updates
-- Bumped `rusqlite`, `axum`, `open`, and `zip` to their latest stable releases.
+- **Core Rust dependencies refreshed**: `rusqlite`, `axum`, `open`, and `zip` were updated to current stable versions.
 
 ---
 
 ## What's New in v1.2.3
 
-### Port Conflict — Kill & Restart
-- New **"Kill process & restart"** button in the "Another ComfyUI is already running" modal. When port 8188 is held by StabilityMatrix or a leftover process, you can now free it and restart MooshieUI's managed ComfyUI in one click instead of manually hunting down the process.
+### Port Conflict Recovery
+- **Kill and restart from the port-conflict modal**: the "Another ComfyUI is already running" flow now offers a direct kill-process-and-restart action.
 
-### Cancel Generation — No More Ghost Runs
-- Cancelling a generation now clears **only that user's** held, pending, and in-progress prompts from the queue — matching the behaviour of "Clear Queue" but scoped per-user. Previously, cancelling a prompt could leave a background generation still running while a new one also started, producing two simultaneous outputs.
+### Generation Cancellation
+- **Cancel no longer leaves ghost runs behind**: cancelling clears only the current user's prompts from the queue.
+- **Ordered wildcard GPU scheduling is more reliable**: fixed a race where later ordered wildcard images could fail after the first image succeeded.
 
-### Ordered Wildcard Reliability Fix
-- Fixed a race condition in the GPU scheduler where ordered wildcard batch jobs would succeed for the first image and then receive **"All GPU workers are busy"** for every subsequent image, even on an idle GPU. The availability notifier now loops until the deadline instead of returning on the first stale wakeup.
+### Browser Mode
+- **Preview menu saves and copies work in browser mode**: fixed a browser/server-mode security error when saving or copying images from the preview menu.
 
-### Artist Style Gallery — Gelbooru Fallback Artists
-- Artists that exist in Danbooru but have **fewer than 50 posts on Gelbooru** now appear in the style browser as **≤50** instead of disappearing. The post-count display, sorting, and uniqueness scoring all use the capped count for below-threshold entries.
-
-### Browser-Mode Preview Save Fix
-- Saving or copying images from the preview menu in server/browser mode (e.g. `mooshieui.gpu.garden`) no longer fails with a **Security Error** when the browser blocks cross-origin `blob:` URL fetches. Generated images now retain a stable server-side temp filename and in-memory blob so save and copy can use those sources directly.
-- JXL preview images no longer disappear after metadata embedding — the display copy now requests a WebP rendition from the server so Chromium can show it.
-
-### Moderator Permissions
-- Moderators now have **full operational access** equivalent to admins: they can install custom nodes, download models, restart ComfyUI, and access filesystem commands. UI panels that are hidden for mods (paths, connection, performance settings) remain hidden — only the backend command gates are elevated.
+### Gallery and Permissions
+- **Small Gelbooru fallback artist sets stay visible**: artists with fewer than 50 posts now appear as `<=50` instead of disappearing.
+- **Moderators can operate the server**: moderator accounts now have access to operational actions like custom-node installs, model downloads, ComfyUI restarts, and filesystem commands.
 
 ---
 
 ## What's New in v1.2.2
 
-### Prompt Scheduling Fixes
-- **SwarmUI `<fromto[N]:A||B>` empty-side handling** — schedules like `<fromto[10]:cat||>` or `<fromto[10]:||dog>` now parse correctly: the empty half is treated as no prompt for that timestep range instead of being rejected.
-- **Double-encoding fix** — the `before` and `after` halves of a `<fromto>` block are no longer also appended to the base prompt. Scheduling now produces a clean swap at the cutoff step instead of bleeding both halves across all steps.
+### Prompt Scheduling
+- **`<fromto[N]:A||B>` parsing fixed**: scheduled prompt blocks now parse correctly.
+- **Double-encoding fixed for scheduled prompt blocks**: `<fromto>` content is no longer encoded twice.
 
 ### JXL Pipeline
-- **Metadata preserved on save/copy** — "Save Image As…" and "Copy to Clipboard" for JXL gallery images now re-embed the generation parameters into the PNG export. The server-side JXL→PNG transcode previously stripped metadata; the frontend now re-injects it according to your metadata mode setting.
-- **Browser-mode JXL support** — the embedded web server now dispatches `load_gallery_image_display` and `load_gallery_image_png` so Firefox and other non-JXL browsers can view and export JXL gallery images.
-- **Edge download fix** — JXL downloads in Edge now use a correct `Content-Disposition` filename, fixing the truncated/garbled filename issue.
+- **JXL metadata is preserved on save and copy**: browser-mode JXL output keeps generation metadata through gallery and clipboard paths.
+- **Browser JXL handling improved**: display and download behavior is more reliable, including Edge downloads.
 
 ### Generation UI
-- **Collapsible recommendation panels** — the Anima, Illustrious, and NanoSaur recommended-settings boxes in Sampler Settings are now collapsible.
-- **Tag autocomplete toggle** — a new Settings switch lets you disable prompt-field tag suggestions entirely. Translated across all 11 locales.
-- **Artist gallery tag insertion** — artist tags inserted from the gallery now convert underscores to spaces before being added to the prompt.
-- **Session image grid overlap fix** — image cards in the bottom session strip no longer overlap at the larger card-size slider values; the grid layout is stable across the full 48–160 px range.
+- **Recommendation panels are collapsible**: Anima, Illustrious, and NanoSaur guidance panels can be collapsed.
+- **Tag autocomplete can be toggled**: users can disable tag autocomplete when it gets in the way.
+- **Artist tags read more naturally**: artist tag underscores are displayed as spaces.
+- **Session image grid overlap fixed**: generated image cards no longer overlap in the session grid.
 
 ---
 
 ## What's New in v1.2.1
 
-### Bug Fix
-- **External ComfyUI toast suppressed in server/browser mode** — the "Another ComfyUI is already running" warning toast now only appears in the desktop (Tauri) app. In Docker/LAN browser mode a pre-running ComfyUI is expected, so the toast was noise and has been silenced.
+### Browser Mode Startup
+- **ComfyUI already-running warning is desktop-only**: the "Another ComfyUI is already running" toast is silenced in Docker and LAN browser mode where a pre-running ComfyUI server is expected.
 
 ---
 
 ## What's New in v1.2.0
 
 ### Anima Base v1.0
-- **Updated Anima recommendation** — the recommended Anima model now points to `anima-base-v1.0.safetensors` from the `circlestone-labs/Anima` Hugging Face repo, replacing the Preview 3 release. Same auto-download (diffusion model + Qwen 3 text encoder + Qwen Image VAE), same tuned defaults (30 steps, CFG 4, `er_sde` sampler).
-- **Preview builds are detection-only** — Anima Preview 3, Anima Preview 3 (FP8), and Anima Preview 2 no longer appear as download options. Users who already have those files on disk will still see and can select them normally.
-- **Compute-capability gate fixed** — the FP8 entry now stays visible for Ada/Blackwell users who have it installed even when the hardware gate is present, so upgrading to Base v1.0 doesn't hide an already-downloaded file.
+- **Anima now uses `anima-base-v1.0.safetensors`**: downloads point at the current model from `circlestone-labs/Anima`.
+- **Old Anima preview options removed**: Preview 3, FP8, and Preview 2 options were removed from model downloads.
+- **Compute capability gate fixed**: Anima download availability now respects the detected GPU capability correctly.
 
 ### External ComfyUI Detection
-- **Port-conflict modal** — when MooshieUI detects an existing ComfyUI, StabilityMatrix, or other process already bound to the configured port (default 8188), a clear modal explains the conflict and lists actionable steps (close the external app, change the port in Settings, or use it as-is).
-- **Persistent warning toast** — startup and manual-retry failures caused by an external ComfyUI now show a persistent warning toast with a "Details" action button instead of the generic error message.
-- **Missing-node error detection** — if MooshieUI connects to an external ComfyUI that doesn't have the required custom nodes loaded, the same modal surfaces automatically with instructions to switch to the managed install.
+- **Port conflicts are surfaced clearly**: startup now shows a port-conflict modal and persistent warning when another ComfyUI is already using the configured port.
+- **Missing-node errors are detected earlier**: startup paths report missing node problems before generation fails later.
 
-### ControlNet Preprocessor Preview
-- **Live preprocessor preview** — a new `generate_controlnet_preprocessor_preview` command builds and queues a minimal workflow that runs only the selected ControlNet preprocessor and returns the processed image for preview before committing to a full generation.
-- **Browser mode support** — the new command is dispatched through the embedded Axum web server for Docker/LAN users.
+### ControlNet Preview
+- **Live preprocessor preview added**: the new `generate_controlnet_preprocessor_preview` command supports on-demand preview generation, including browser mode.
 
 ### Startup Reliability
-- **Tokio reactor panic fixed** — `spawn_background` now uses `tauri::async_runtime::spawn` in desktop mode and `tokio::spawn` in server mode, preventing the "there is no reactor running" panic that occurred when background tasks were spawned during Tauri setup before the runtime was active.
+- **Tokio reactor panic fixed**: desktop and server modes now spawn async work with the correct runtime APIs.
 
-### i18n
-- **Full i18n coverage for new UI** — all new user-visible strings (external ComfyUI modal, preset activation modal, generate button ordered-run mode, app status messages, connection error toasts) are keyed and translated across all 11 shipped locales.
+### Internationalization
+- **New UI strings are localized**: new release UI text was routed through the locale system across all supported locales.
 
 ---
 
 ## What's New in v1.1.11
 
 ### Prompt Presets
-- **Ordered wildcard presets** — activating an ordered wildcard now turns the Generate button into a one-click ordered run that queues every line in the wildcard list, then wraps back to the first entry. Only one ordered wildcard preset stays active at a time so character lists do not combine accidentally.
+- **Ordered wildcard presets** — prompt preset wildcards can now cycle through their lines in document order, wrapping back to the first entry after the last option. This makes it much easier to test every wildcard entry without manually selecting each one.
 
 ### Startup Reliability
 - **Missing MooshieUI custom nodes are caught before generation** — MooshieUI now verifies every vital bundled node class (`MooshieSaveImage`, `MooshieFaceDetailer`, `MooshieSoftGuidance`, `MooshieSmartGuidance`, `NanoSaurLoader`, and `ApplyTiledDiffusion`) before treating an existing, newly spawned, worker, or reachable remote ComfyUI server as ready. If ComfyUI was already running and has not loaded the updated nodes, startup now shows a clear restart/install message instead of letting generations fail later with a missing-node error.
